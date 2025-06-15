@@ -6,11 +6,19 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useCallback, useEffect, useState } from "react";
-import { get } from "./lib/utils/api";
+import { get, post } from "./lib/utils/api";
 import { goUpAdirectory } from "./lib/utils/path";
+import { Button } from "./components/ui/button";
 
 const defaultPath = () => "/";
 const defaultChildOptions: () => string[] = () => [];
+
+type BackupScheduleRequest = {
+    srcPath: string;
+    destPath: string;
+}
+
+//TODO:add check on same src and dest.
 
 const handlePathChange = (newValue: string, currValue: string, setPath: (value: string) => void) => {
     if (newValue !== "..") {
@@ -82,6 +90,20 @@ function App() {
 
     }, [destPath]);
 
+    const isSubmitDisabled = useCallback(() => {
+        return !srcPath || srcPath === "/" || !destPath || destPath === "/"
+
+    }, [srcPath, destPath]);
+
+    const handleSubmitClick = async () => {
+        console.log("submit clicked");
+        const req: BackupScheduleRequest = {
+            srcPath,
+            destPath
+        }
+        await post<void, void>("/api/backup", req)
+    }
+
 
     return (
         <div>
@@ -89,6 +111,9 @@ function App() {
             <div className="flex">
                 <Path currPath={srcPath} onPathChange={handleSrcPathChange} childPathOptions={srcChildPathOptions} />
                 <Path currPath={destPath} onPathChange={handleDestPathChange} childPathOptions={destChildPathOptions} />
+                <Button type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
+                    Submit
+                </Button>
             </div>
         </div>
     )
