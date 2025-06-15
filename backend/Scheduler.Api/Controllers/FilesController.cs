@@ -1,5 +1,6 @@
 
 using Microsoft.AspNetCore.Mvc;
+using Scheduler.Dtos;
 
 namespace Scheduler.Api.Controllers;
 
@@ -19,8 +20,25 @@ public class FilesController : BaseApiController
             return NotFound("Directory does not exist.");
         }
 
-        var directories = Directory.GetDirectories(path);
+        IEnumerable<string> directories = Directory.GetDirectories(path);
 
-        return Ok(directories);
+        // TODO: write unit test for excluding hidden directories.
+        directories = directories.Where(dirPath =>
+        {
+            var pathSlice = dirPath.AsSpan();
+            var lastSlashIndex = pathSlice.LastIndexOf('/');
+            if (lastSlashIndex == pathSlice.Length - 1)
+            {
+                pathSlice = pathSlice[..^1];
+            }
+
+            lastSlashIndex = pathSlice.LastIndexOf('/');
+
+            var folderName = pathSlice[(lastSlashIndex + 1)..];
+            return !folderName.StartsWith(".");
+        });
+        ApiResult<IEnumerable<string>, object> result = new(directories);
+
+        return Ok(result);
     }
 }
