@@ -1,7 +1,6 @@
 import {
     Select,
     SelectContent,
-    SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
@@ -9,6 +8,9 @@ import { useCallback, useEffect, useState } from "react";
 import { get, post } from "./lib/utils/api";
 import { goUpAdirectory } from "./lib/utils/path";
 import { Button } from "./components/ui/button";
+import Cron from "./cron";
+import { cn } from "./lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 
 const defaultPath = () => "/";
 const defaultChildOptions: () => string[] = () => [];
@@ -21,6 +23,7 @@ type BackupScheduleRequest = {
 //TODO:add check on same src and dest.
 
 const handlePathChange = (newValue: string, currValue: string, setPath: (value: string) => void) => {
+    console.log("path value: ", newValue);
     if (newValue !== "..") {
         setPath(newValue);
         return;
@@ -29,7 +32,6 @@ const handlePathChange = (newValue: string, currValue: string, setPath: (value: 
     if (currValue === "/") {
         throw new Error("Already at root");
     }
-    console.log("new path: ", goUpAdirectory(currValue));
     setPath(goUpAdirectory(currValue));
 }
 
@@ -48,20 +50,24 @@ function App() {
 
     }, [srcPath])
 
+    const [isFetching, setIsFetching] = useState(false);
+
 
 
     useEffect(() => {
         console.log("path changed: ", srcPath);
         const fn = async () => {
             const searchParams = new URLSearchParams({ "path": srcPath })
+            setIsFetching(true);
             const res = await get<string[], any>(`/api/files?${searchParams.toString()}`)
+            setIsFetching(false);
             console.log(res);
             if (!res.ok) {
                 return;
             }
 
             if (srcPath !== "/") {
-                res.ok.push("..");
+                res.ok.unshift("..");
             }
             setSrcChildPathOptions(res.ok);
 
@@ -74,7 +80,9 @@ function App() {
         console.log("path changed: ", destPath);
         const fn = async () => {
             const searchParams = new URLSearchParams({ "path": destPath })
+            setIsFetching(true);
             const res = await get<string[], any>(`/api/files?${searchParams.toString()}`)
+            setIsFetching(false);
             console.log(res);
             if (!res.ok) {
                 return;
@@ -109,35 +117,73 @@ function App() {
         <div>
             <h1> hello </h1>
             <div className="flex">
-                <Path currPath={srcPath} onPathChange={handleSrcPathChange} childPathOptions={srcChildPathOptions} />
-                <Path currPath={destPath} onPathChange={handleDestPathChange} childPathOptions={destChildPathOptions} />
-                <Button type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
+                <Path currPath={srcPath} onPathChange={handleSrcPathChange}
+                    childPathOptions={srcChildPathOptions} isFetching={isFetching} />
+                <Path currPath={destPath}
+                    onPathChange={handleDestPathChange}
+                    childPathOptions={destChildPathOptions}
+                    isFetching={isFetching} />
+                <Button className="mx-6" type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
                     Submit
                 </Button>
+            </div>
+            <div>
+                <Cron />
             </div>
         </div>
     )
 }
 
 
-const Path = ({ childPathOptions, currPath, onPathChange }: { childPathOptions: string[], currPath: string, onPathChange: (val: string) => void }) => {
+const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
+    childPathOptions: string[], currPath: string,
+    onPathChange: (val: string) => void,
+    isFetching: boolean,
+}) => {
+
+    const [open, setOpen] = useState(false);
+
+    const handleOpen = (val: boolean) => {
+        console.log("open: ", val);
+        setOpen(val);
+    }
+
+    const handleValueClick = (val: string) => {
+        onPathChange(val);
+    }
+
     return (
 
-        <Select value={currPath} onValueChange={onPathChange}>
-            <SelectTrigger className="w-[180px] bg-red-100">
-                <SelectValue placeholder="Theme" >
-                    {currPath}
-                </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
+        <Select open={open} value={currPath} onOpenChange={handleOpen} >
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Theme" >
+                            {currPath}
+                        </SelectValue>
+                    </SelectTrigger>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <div>
+                        {currPath}
+                    </div>
+                </TooltipContent>
+            </Tooltip>
+            <SelectContent className={cn("p-0 bg-red-300", isFetching && "h-[100px]")}>
                 {
-                    childPathOptions.map(childPath => {
-                        return <SelectItem key={childPath} value={childPath}>{childPath}</SelectItem>
+                    isFetching && <div className="flex flex-col items-center justify-center w-full h-full">
+                        ...
 
+                    </div>
+                }
+                {
+                    !isFetching && childPathOptions.map(childPath => {
+                        return <div className="px-1 py-1 cursor-pointer" key={childPath} onClick={() => handleValueClick(childPath)} >{childPath}</div>
                     })
+
                 }
             </SelectContent>
-        </Select >
+        </Select>
     )
 
 }
