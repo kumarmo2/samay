@@ -1,20 +1,21 @@
 
 import { isDigit } from ".";
+import type { Result } from "./result";
 
-enum TokenType {
+export enum TokenType {
     Number,
     Star,
     Slash,
     Dash,
 }
 
-type Token = {
+export type Token = {
     type: TokenType,
     value?: number | string,
 }
 
 
-export const cronLexer = (cron: string) => {
+export const cronLexer = (cron: string): Result<Token[][], string> => {
     const expression = cron.trim();
 
     let i = 0;
@@ -47,11 +48,13 @@ export const cronLexer = (cron: string) => {
                     i++;
                 }
                 tokens.push({ type: TokenType.Number, value: +expression.slice(start, i) });
+            } else {
+                return { type: 'err', val: `unknown character found: ${c}` }
             }
         }
         expressionParts.push(tokens);
     }
-    return expressionParts
+    return { type: 'ok', val: expressionParts }
 }
 
 
