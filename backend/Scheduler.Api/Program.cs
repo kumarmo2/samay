@@ -20,6 +20,11 @@ public class Program
 
         var app = builder.Build();
 
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+
         app.MapControllers();
 
         app.Run();

@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler.Api", "Scheduler.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler.Dtos", "Scheduler.Dtos\Scheduler.Dtos.csproj", "{B4DEE50F-434D-4FAD-85DD-4CC9A24E4ECC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scheduler.DataAccess", "Scheduler.DataAccess\Scheduler.DataAccess.csproj", "{0DC8CF28-597C-40C0-928A-61BCC557B8B8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{B4DEE50F-434D-4FAD-85DD-4CC9A24E4ECC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4DEE50F-434D-4FAD-85DD-4CC9A24E4ECC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4DEE50F-434D-4FAD-85DD-4CC9A24E4ECC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0DC8CF28-597C-40C0-928A-61BCC557B8B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0DC8CF28-597C-40C0-928A-61BCC557B8B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0DC8CF28-597C-40C0-928A-61BCC557B8B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0DC8CF28-597C-40C0-928A-61BCC557B8B8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
