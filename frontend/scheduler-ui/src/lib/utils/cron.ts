@@ -14,6 +14,82 @@ export type Token = {
     value?: number | string,
 }
 
+export type CronPartType = "minute" | "hour" | "day" | "month" | "week"
+
+
+/// returns a humar readable string if the cron expression is valid
+export const cronParser = (cron: string): Result<string, string> => {
+    const tokensResult = cronLexer(cron);
+    if (tokensResult.type !== "ok") {
+        return { type: 'err', val: tokensResult.val }
+    }
+
+    const tokens = tokensResult.val;
+    const minuteTokens = tokens[0];
+
+    var minutePartValidationResult = validateMinutePart(minuteTokens);
+    if (minutePartValidationResult.type !== "ok") {
+        return { type: 'err', val: minutePartValidationResult.val }
+    }
+
+    const hourTokens = tokens[1];
+    var hourPartValidationResult = validateHourPart(hourTokens);
+    if (hourPartValidationResult.type !== "ok") {
+        return { type: 'err', val: hourPartValidationResult.val }
+    }
+
+    return { type: 'ok', val: "TODO: implement human readable string" }
+
+}
+
+const validateHourPart = (tokens: Token[]): Result<void, string> => {
+    if (tokens.length === 0) {
+        return { type: 'err', val: "hour part is required" }
+    }
+    if (tokens.length > 1) {
+        return { type: 'err', val: "hour part can only have one value" }
+    }
+
+    const token = tokens[0];
+    if (token.type === TokenType.Star) {
+        return { type: 'ok', val: undefined }
+    }
+    if (token.type === TokenType.Number) {
+        const n = +(token.value as number);
+        if (n < 0 || n > 23) {
+            return { type: 'err', val: "hour part must be between 0 and 23" }
+        }
+        return { type: 'ok', val: undefined }
+    }
+
+    return { type: 'err', val: `unknown token type: ${token.type}, value: ${token.value}` }
+}
+
+const validateMinutePart = (tokens: Token[]): Result<void, string> => {
+    if (tokens.length === 0) {
+        return { type: 'err', val: "minute part is required" }
+    }
+
+    if (tokens.length > 1) {
+        return { type: 'err', val: "minute part can only have one value" }
+    }
+
+    const token = tokens[0];
+    if (token.type === TokenType.Star) {
+        return { type: 'ok', val: undefined }
+    }
+    if (token.type === TokenType.Number) {
+        const n = +(token.value as number);
+        if (n < 0 || n > 59) {
+            return { type: 'err', val: "minute part must be between 0 and 59" }
+        }
+        return { type: 'ok', val: undefined }
+    }
+
+    return { type: 'err', val: `unknown token type: ${token.type}, value: ${token.value}` }
+}
+
+
 
 export const cronLexer = (cron: string): Result<Token[][], string> => {
     const expression = cron.trim();

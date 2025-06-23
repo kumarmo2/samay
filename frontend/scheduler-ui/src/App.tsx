@@ -119,15 +119,6 @@ function App() {
         // await post<void, void>("/api/backup", req)
     }
 
-    const handleHourSelect = useCallback((hour: number) => {
-        setHour(hour)
-    }, []);
-
-    const handleMinuteSelect = useCallback((minute: number) => {
-        setMinute(minute)
-    }, [])
-
-
     return (
         <div>
             <h1> hello </h1>
@@ -143,10 +134,7 @@ function App() {
                 </Button>
             </div>
             <div>
-                <Cron minute={minute} handleMinuteSelect={handleMinuteSelect} cronType={cronType} hour={hour} handleHourSelect={handleHourSelect} />
-            </div>
-            <div>
-                <CronExpression cronType={cronType} />
+                <CronExpression />
             </div>
         </div>
     )
@@ -204,66 +192,6 @@ const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
         </Select>
     )
 
-}
-
-function Cron({ hour, handleHourSelect, cronType, minute, handleMinuteSelect }: {
-    cronType: CronType,
-    hour: number,
-    minute: number,
-    handleMinuteSelect: (val: number) => void,
-    handleHourSelect: (val: number) => void,
-}) {
-    return <div>
-        '{cronType}' Cron
-        <div className="flex">
-            {cronType !== "oneshot" && cronType !== "hourly" && <Hours hour={hour} handleHourSelect={handleHourSelect} />}
-            <Minutes minute={minute} handleMinuteSelect={handleMinuteSelect} />
-        </div>
-    </div>
-}
-
-
-const Hours = ({ hour, handleHourSelect }: { hour: number, handleHourSelect: (val: number) => void }) => {
-    return (
-        <Select value={hour.toString()} onValueChange={(val) => handleHourSelect(+val)}>
-            <SelectTrigger className="w-[100px] bg-red-100">
-                <SelectValue placeholder="hours" >
-                    {hour}
-                </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="h-[200px]">
-                {
-                    hours.map(h => {
-
-                        return <SelectItem key={h} value={h.toString()}>{h}</SelectItem>
-
-                    })
-                }
-            </SelectContent>
-        </Select >
-    )
-}
-
-const Minutes = ({ minute, handleMinuteSelect }: { minute: number, handleMinuteSelect: (val: number) => void }) => {
-    return (
-
-        <Select value={`${minute}`} onValueChange={(val) => handleMinuteSelect(+val)}>
-            <SelectTrigger className="w-[100px] bg-red-100">
-                <SelectValue placeholder="mins" >
-                    {minute}
-                </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="h-[200px]">
-                {
-                    minutes.map(h => {
-
-                        return <SelectItem key={h} value={h.toString()}>{h}</SelectItem>
-
-                    })
-                }
-            </SelectContent>
-        </Select >
-    )
 }
 
 export default App

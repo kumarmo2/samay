@@ -1,43 +1,38 @@
-import { useState } from "react";
-import type { CronType } from "./App";
+import React from "react";
 import { Input } from "./components/ui/input";
-
-export default function CronComponent() {
-}
-
-
-type DailyCronType = "every"
-const DailyCron = () => {
-
-    return (
-        <div>
-            <h1>Daily Cron</h1>
-
-        </div>
-    )
-
-}
+import { cronParser } from "./lib/utils/cron";
+import { cn } from "./lib/utils";
 
 
-export const CronExpression = ({ cronType, className }: { cronType: CronType, className?: string }) => {
-    const [minute, setMinute] = useState("0");
-    const [hour, setHour] = useState("0");
-    const [day, setDay] = useState("*");
-    const [month, setMonth] = useState("*");
-    const [week, setWeek] = useState("*");
+export const CronExpression = () => {
 
-    const cron = `${cronType} ${minute} ${hour} ${day} ${month} ${week}`
+    const minuteRef = React.useRef<HTMLInputElement>(null);
+    const hourRef = React.useRef<HTMLInputElement>(null);
+    const [hasError, setHasError] = React.useState(false);
+
+    const handleOnBlur = () => {
+        const minuteValue = minuteRef.current?.value || "*";
+        const hourValue = hourRef.current?.value || "*";
+        console.log("blurred: ", "minuteValue: ", minuteValue, "hourValue: ", hourValue);
+        const parseResult = cronParser(`${minuteValue} ${hourValue} * * *`);
+        if (parseResult.type !== "ok") {
+            console.log("error: ", parseResult.val);
+            setHasError(true);
+            return
+        }
+        setHasError(false);
+        const humanReadableForm = parseResult.val;
+        console.log("tokens: ", humanReadableForm);
+    }
 
     return <div>Cron expression
-        <div className="flex gap-2">
-            <Input value={minute} className="border-emerald-300 w-10" />
-            <Input value={hour} className="border-emerald-300 w-10" />
-            <Input value={day} disabled className="border-emerald-300 w-10" />
-            <Input value={month} disabled className="border-emerald-300 w-10" />
-            <Input value={week} disabled className="border-emerald-300 w-10" />
+        <div className={cn("flex gap-2", hasError && " [&>*]:border-red-900")}>
+            <Input ref={minuteRef} placeholder="*" onBlur={handleOnBlur} className="border-emerald-300 w-10" />
+            <Input ref={hourRef} placeholder="*" onBlur={handleOnBlur} className="border-emerald-300 w-10" />
+            <Input placeholder="*" disabled className="border-emerald-300 w-10" />
+            <Input placeholder="*" disabled className="border-emerald-300 w-10" />
+            <Input placeholder="*" disabled className="border-emerald-300 w-10" />
         </div>
-
-
     </div>
 }
 
