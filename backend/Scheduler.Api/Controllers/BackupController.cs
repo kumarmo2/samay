@@ -42,6 +42,7 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
         {
             return Ok(new ApiResult<object, string>("Source and destination paths cannot be same."));
         }
+        Console.WriteLine($"srcExists: {srcExists}, destExists: {destExists}");
         var schedule = await _scheduleDao.GetForSourceAndDest(request.SrcPath, request.DestPath);
         if (schedule != null && schedule.Id > 0)
         {
@@ -55,36 +56,13 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
             CronExpression = request.CronExpression
         };
 
-
-
-
-        // if (request.SrcPath == request.DestPath)
-        // {
-        //     throw new Exception("srcpath and destpath cannot be same");
-        // }
-        // var psi = new ProcessStartInfo
-        // {
-        //     FileName = "rsync",
-        //     ArgumentList = { "-rPavh", request.SrcPath, request.DestPath },
-        //     RedirectStandardOutput = false,
-        //     RedirectStandardError = true,
-        //     UseShellExecute = false,
-        //     CreateNoWindow = true
-        // };
-        // var process = Process.Start(psi);
-        // if (process is null)
-        // {
-        //     return Ok(new ApiResult<object, string>("Failed to start the backup process."));
-        // }
-        // await process.WaitForExitAsync();
-        // if (process.ExitCode != 0)
-        // {
-        //     Console.WriteLine($"backup error: {process.StandardError}");
-        //     return new ObjectResult(new ApiResult<object, string>("Internal server error"))
-        //     {
-        //         StatusCode = 500
-        //     };
-        // }
-        return Ok(new ApiResult<object, string>(new { }));
+        Console.WriteLine($"schedule: will create the schedule");
+        var id = await _scheduleDao.Create(newSchedule);
+        Console.WriteLine($"schedule: created the schedule with id: {id}");
+        if (id <= 0)
+        {
+            return Ok(new ApiResult<object, string>("Internal server error"));
+        }
+        return Ok(new ApiResult<int, string>(id));
     }
 }
