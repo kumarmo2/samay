@@ -1,7 +1,7 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Scheduler.DataAccess.Schedules;
 using Scheduler.Dtos;
+using sm = Scheduler.Models;
 
 namespace Scheduler.Api.Controllers;
 
@@ -18,8 +18,45 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
             return BadRequest("Request cannot be null.");
         }
         Console.WriteLine($"request.srcpath: {request.SrcPath}, request.destpath: {request.DestPath}");
+        Console.WriteLine($"request.cronExpression: {request.CronExpression}");
         var schedules = await _scheduleDao.List();
         Console.WriteLine($"number of schedules: {schedules.Count}");
+
+        // TODO: do proper validation for cron expression.
+        if (request.CronExpression.Length == 0)
+        {
+            return Ok(new ApiResult<object, string>("Cron expression cannot be empty."));
+        }
+
+        var srcExists = Directory.Exists(request.SrcPath);
+        if (!srcExists)
+        {
+            return Ok(new ApiResult<object, string>("Source path does not exist."));
+        }
+        var destExists = Directory.Exists(request.DestPath);
+        if (!destExists)
+        {
+            return Ok(new ApiResult<object, string>("Destination path does not exist."));
+        }
+        if (request.SrcPath == request.DestPath)
+        {
+            return Ok(new ApiResult<object, string>("Source and destination paths cannot be same."));
+        }
+        var schedule = await _scheduleDao.GetForSourceAndDest(request.SrcPath, request.DestPath);
+        if (schedule != null && schedule.Id > 0)
+        {
+            return Ok(new ApiResult<object, string>("Schedule already exists."));
+        }
+
+        var newSchedule = new sm.Schedule()
+        {
+            SrcPath = request.SrcPath,
+            DestPath = request.DestPath,
+            CronExpression = request.CronExpression
+        };
+
+
+
 
         // if (request.SrcPath == request.DestPath)
         // {

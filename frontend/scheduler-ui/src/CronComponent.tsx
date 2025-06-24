@@ -30,11 +30,11 @@ export const CronExpression = React.forwardRef(({ onValueChange }: { onValueChan
 
     return <div>Cron expression
         <div ref={ref} className={cn("flex gap-2", hasError && " [&>*]:border-red-900")}>
-            <Input defaultValue={0} ref={minuteRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-10" />
-            <Input defaultValue={0} ref={hourRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-10" />
-            <Input type="text" defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-10" />
-            <Input type="text" defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-10" />
-            <Input defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-10" />
+            <Input defaultValue={0} ref={minuteRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-12" />
+            <Input defaultValue={0} ref={hourRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-12" />
+            <Input type="text" defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-12" />
+            <Input type="text" defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-12" />
+            <Input defaultValue="*" placeholder="*" disabled className="border-emerald-300 w-12" />
         </div>
     </div>
 })

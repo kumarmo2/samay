@@ -139,7 +139,9 @@ function App() {
         const cronExpression = values.join(" ");
         console.log("cron expression: ", cronExpression);
         const requestBody: BackupScheduleRequest = {
+            srcPath, destPath, cronExpression
         }
+        await post<BackupScheduleRequest, any>("/api/backup", requestBody)
     }
 
     return (
