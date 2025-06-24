@@ -1,16 +1,17 @@
-using System.Collections.Generic;
 using Scheduler.Models;
+using Dapper;
 
 namespace Scheduler.DataAccess.Schedules;
 
 
-public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory)
+public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : IScheduleDao
 {
     private readonly IDatabaseConnectionFactory _dbConnectionFactory = dbConnectionFactory;
 
-
-    //     public async Task<IEnumerable<Scheduler.Models.>> Get();
-    //     {
-    //         throw new NotImplementedException();
-    // }
+    public async Task<List<Schedule>> List()
+    {
+        using var conn = await _dbConnectionFactory.GetConnectionAsync();
+        var query = "select * from scheduler.schedules";
+        return [.. await conn.QueryAsync<Schedule>(query)];
+    }
 }

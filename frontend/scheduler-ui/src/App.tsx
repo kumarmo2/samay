@@ -11,7 +11,7 @@ import { Button } from "./components/ui/button";
 import { cn } from "./lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { CronExpression } from "./CronComponent";
-import type { Result } from "./lib/utils/result";
+import type { Maybe, Result } from "./lib/utils/result";
 
 const defaultPath = () => "/home/kumarmo2";
 const defaultBackupDir = () => "/home/kumarmo2/temp"
@@ -21,6 +21,7 @@ const defaultChildOptions: () => string[] = () => [];
 type BackupScheduleRequest = {
     srcPath: string;
     destPath: string;
+    cronExpression: string;
 }
 
 export const hours = Array.from({ length: 24 }, (_, i) => i)
@@ -55,6 +56,7 @@ function App() {
     }, [srcPath])
 
     const dataRef = React.useRef(initialDataRefValue);
+    const cronRef = React.useRef<Maybe<HTMLDivElement>>(null);
 
     const handleDestPathChange = useCallback((newValue: string) => {
         handlePathChange(newValue, destPath, setDestPath);
@@ -119,8 +121,25 @@ function App() {
     }, [srcPath, destPath]);
 
     const handleSubmitClick = async () => {
-        console.log("submit clicked", { srcPath, destPath });
-        console.log("cron expression ok: ", dataRef.current.isCronExpressionCorrect);
+        if (!dataRef.current.isCronExpressionCorrect) {
+            alert("Fix the cron expression");
+            return
+        }
+        // TODO: code small because of using `as`. Is there a way to avoid this type coersion.
+        const values = Array.from<HTMLInputElement>(cronRef.current?.children as Iterable<HTMLInputElement>).map(input => {
+            if (input.value === "" || input.value === null) {
+                console.log("returning placeholder: ", input.placeholder);
+                return input.placeholder;
+            }
+            return input.value
+        });
+
+
+        console.log("values: ", values);
+        const cronExpression = values.join(" ");
+        console.log("cron expression: ", cronExpression);
+        const requestBody: BackupScheduleRequest = {
+        }
     }
 
     return (
@@ -138,7 +157,7 @@ function App() {
                 </Button>
             </div>
             <div>
-                <CronExpression onValueChange={onCronValueChange} />
+                <CronExpression ref={cronRef} onValueChange={onCronValueChange} />
             </div>
         </div>
     )
