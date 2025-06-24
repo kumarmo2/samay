@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Scheduler.Dtos\Scheduler.Dtos.csproj" />
+    <ProjectReference Include="..\Scheduler.DataAccess\Scheduler.DataAccess.csproj" />
+    <ProjectReference Include="..\Scheduler.Models\Scheduler.Models.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

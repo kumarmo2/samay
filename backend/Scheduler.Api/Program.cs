@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Scheduler.DataAccess;
 
 namespace Schedule.Api;
 
@@ -10,6 +11,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var services = builder.Services;
         services.AddControllers();
+        services.AddDatabaseConnection(builder.Configuration);
 
         services.ConfigureHttpJsonOptions(options =>
         {

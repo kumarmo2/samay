@@ -1,19 +1,21 @@
 import {
     Select,
     SelectContent,
-    SelectItem,
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { get, post } from "./lib/utils/api";
 import { goUpAdirectory } from "./lib/utils/path";
 import { Button } from "./components/ui/button";
 import { cn } from "./lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { CronExpression } from "./CronComponent";
+import type { Result } from "./lib/utils/result";
 
-const defaultPath = () => "/";
+const defaultPath = () => "/home/kumarmo2";
+const defaultBackupDir = () => "/home/kumarmo2/temp"
+
 const defaultChildOptions: () => string[] = () => [];
 
 type BackupScheduleRequest = {
@@ -38,28 +40,34 @@ const handlePathChange = (newValue: string, currValue: string, setPath: (value: 
     setPath(goUpAdirectory(currValue));
 }
 
+const initialDataRefValue = {
+    isCronExpressionCorrect: true
+}
+
 function App() {
-    const [srcPath, setSrcPath] = useState(defaultPath());
+    const [srcPath, setSrcPath] = useState(defaultPath);
     const [srcChildPathOptions, setSrcChildPathOptions] = useState(defaultChildOptions);
-    const [destPath, setDestPath] = useState(defaultPath());
+    const [destPath, setDestPath] = useState(defaultBackupDir);
     const [destChildPathOptions, setDestChildPathOptions] = useState(defaultChildOptions);
     const handleSrcPathChange = useCallback((newValue: string) => {
         handlePathChange(newValue, srcPath, setSrcPath);
 
     }, [srcPath])
 
+    const dataRef = React.useRef(initialDataRefValue);
+
     const handleDestPathChange = useCallback((newValue: string) => {
         handlePathChange(newValue, destPath, setDestPath);
 
-    }, [srcPath])
+    }, [destPath])
 
     const [isFetching, setIsFetching] = useState(false);
-    const [hour, setHour] = useState<number>(0);
-    const [minute, setMinute] = useState<number>(0);
-    const [cronType] = useState<CronType>("daily");
 
+    const onCronValueChange = useCallback((parseResult: Result<string, string>) => {
+        console.log("parseResult: ", parseResult);
+        dataRef.current.isCronExpressionCorrect = parseResult.type === "ok"
 
-
+    }, [dataRef.current])
 
     useEffect(() => {
         console.log("path changed: ", srcPath);
@@ -96,7 +104,7 @@ function App() {
             }
 
             if (destPath !== "/") {
-                res.ok.push("..");
+                res.ok.unshift("..");
             }
             setDestChildPathOptions(res.ok);
 
@@ -111,12 +119,8 @@ function App() {
     }, [srcPath, destPath]);
 
     const handleSubmitClick = async () => {
-        console.log("submit clicked", { srcPath, destPath, hour, minute, cronType });
-        // const req: BackupScheduleRequest = {
-        //     srcPath,
-        //     destPath
-        // }
-        // await post<void, void>("/api/backup", req)
+        console.log("submit clicked", { srcPath, destPath });
+        console.log("cron expression ok: ", dataRef.current.isCronExpressionCorrect);
     }
 
     return (
@@ -134,7 +138,7 @@ function App() {
                 </Button>
             </div>
             <div>
-                <CronExpression />
+                <CronExpression onValueChange={onCronValueChange} />
             </div>
         </div>
     )
