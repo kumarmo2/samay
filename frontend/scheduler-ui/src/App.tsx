@@ -145,20 +145,19 @@ function App() {
     }
 
     return (
-        <div>
-            <h1> hello </h1>
-            <div className="flex">
+        <div className="flex flex-col items-center h-screen py-10 mx-[100px] border-red-300 border-x">
+            <div className="flex gap-4">
                 <Path currPath={srcPath} onPathChange={handleSrcPathChange}
                     childPathOptions={srcChildPathOptions} isFetching={isFetching} />
                 <Path currPath={destPath}
                     onPathChange={handleDestPathChange}
                     childPathOptions={destChildPathOptions}
                     isFetching={isFetching} />
-                <Button className="mx-6" type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
+                <Button className="mx-6 cursor-pointer" type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
                     Submit
                 </Button>
             </div>
-            <div>
+            <div className="mt-4">
                 <CronExpression ref={cronRef} onValueChange={onCronValueChange} />
             </div>
         </div>
@@ -200,7 +199,7 @@ const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
                     </div>
                 </TooltipContent>
             </Tooltip>
-            <SelectContent className={cn("p-0 bg-red-300", isFetching && "h-[100px]")}>
+            <SelectContent className={cn("p-0 ", isFetching && "h-[100px]")}>
                 {
                     isFetching && <div className="flex flex-col items-center justify-center w-full h-full">
                         ...
