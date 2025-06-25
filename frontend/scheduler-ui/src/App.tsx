@@ -187,7 +187,7 @@ const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
         <Select open={open} value={currPath} onOpenChange={handleOpen} >
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <SelectTrigger className="w-[180px]">
+                    <SelectTrigger className="w-[380px]">
                         <SelectValue placeholder="Theme" >
                             {currPath}
                         </SelectValue>
