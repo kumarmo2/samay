@@ -26,17 +26,7 @@ public class BackupService : IBackupService
             Task.Run(async () =>
                     {
 
-                        await foreach (var item in _channel.Reader.ReadAllAsync())
-                        {
-                            _logger.LogInformation("BackupService.Start.loop {i}: ", i);
-                            var action = await _channel.Reader.ReadAsync();
-                            _logger.LogInformation("BackupService.Start.loop {i}: picked action", i);
-                            await Task.Delay(1000);
-                            await action();
-                        }
-
-
-                        // while (true)
+                        // await foreach (var item in _channel.Reader.ReadAllAsync())
                         // {
                         //     _logger.LogInformation("BackupService.Start.loop {i}: ", i);
                         //     var action = await _channel.Reader.ReadAsync();
@@ -44,6 +34,20 @@ public class BackupService : IBackupService
                         //     await Task.Delay(1000);
                         //     await action();
                         // }
+
+
+                        while (await _channel.Reader.WaitToReadAsync())
+                        {
+                            _logger.LogInformation("BackupService.Start.loop {i}: ", i);
+                            _channel.Reader.TryRead(out var action);
+                            _logger.LogInformation("BackupService.Start.loop {i}: picked action", i);
+                            if (action is null)
+                            {
+                                _logger.LogInformation("BackupService.Start.loop {i}: action is null", i);
+                                continue;
+                            }
+                            await action();
+                        }
                     });
         }
         // Task.WaitAll(tasks);
