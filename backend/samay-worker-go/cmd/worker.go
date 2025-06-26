@@ -10,7 +10,7 @@ type WorkerPool struct {
 	ch          chan func()
 }
 
-func NewWorker(parallelism int) (*WorkerPool, error) {
+func NewWorkerPool(parallelism int) (*WorkerPool, error) {
 	if parallelism <= 0 {
 		return nil, errors.New("parallelism must be greater than 0")
 	}
