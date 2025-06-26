@@ -12,6 +12,7 @@ import { cn } from "./lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./components/ui/tooltip";
 import { CronExpression } from "./CronComponent";
 import type { Maybe, Result } from "./lib/utils/result";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./components/ui/table";
 
 const defaultPath = () => "/home/kumarmo2";
 const defaultBackupDir = () => "/home/kumarmo2/temp"
@@ -19,6 +20,13 @@ const defaultBackupDir = () => "/home/kumarmo2/temp"
 const defaultChildOptions: () => string[] = () => [];
 
 type BackupScheduleRequest = {
+    srcPath: string;
+    destPath: string;
+    cronExpression: string;
+}
+
+type Schedule = {
+    id: number;
     srcPath: string;
     destPath: string;
     cronExpression: string;
@@ -71,6 +79,8 @@ function App() {
 
     }, [dataRef.current])
 
+    const [schedules, setSchedules] = useState<Schedule[]>([]);
+
     useEffect(() => {
         console.log("path changed: ", srcPath);
         const fn = async () => {
@@ -115,6 +125,22 @@ function App() {
 
     }, [destPath]);
 
+
+    useEffect(() => {
+        const fn = async () => {
+            const res = await get<Schedule[], string>("/api/backup/schedules");
+            if (!res.ok) {
+                return;
+            }
+            setSchedules(res.ok);
+            console.log("res: ", res);
+
+        }
+        fn();
+
+
+    }, []);
+
     const isSubmitDisabled = useCallback(() => {
         return !srcPath || srcPath === "/" || !destPath || destPath === "/"
 
@@ -145,7 +171,7 @@ function App() {
     }
 
     return (
-        <div className="flex flex-col items-center h-screen py-10 mx-[100px] border-red-300 border-x">
+        <div className="flex flex-col items-center h-screen py-10 mx-10 border-red-300 border-x">
             <div className="flex gap-4">
                 <Path currPath={srcPath} onPathChange={handleSrcPathChange}
                     childPathOptions={srcChildPathOptions} isFetching={isFetching} />
@@ -159,6 +185,9 @@ function App() {
             </div>
             <div className="mt-4">
                 <CronExpression ref={cronRef} onValueChange={onCronValueChange} />
+            </div>
+            <div>
+                <SchedulesTable schedules={schedules} />
             </div>
         </div>
     )
@@ -216,6 +245,41 @@ const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
         </Select>
     )
 
+}
+
+
+
+const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
+    return (
+        <div className="flex flex-col">
+            <Table>
+                <TableHeader>
+                    <TableHead>Source Path</TableHead>
+                    <TableHead>Destination Path</TableHead>
+                    <TableHead>Cron Expression</TableHead>
+                    <TableHead>Actions</TableHead>
+                </TableHeader>
+                <TableBody>
+                    {
+                        schedules.map(schedule => {
+                            return (
+                                <TableRow key={schedule.id}>
+                                    <TableCell>{schedule.srcPath}</TableCell>
+                                    <TableCell>{schedule.destPath}</TableCell>
+                                    <TableCell>{schedule.cronExpression}</TableCell>
+                                    <TableCell>
+                                        <Button className="mx-6 cursor-pointer" type="submit" onClick={() => { }} disabled={false} >
+                                            Delete
+                                        </Button>
+                                    </TableCell>
+                                </TableRow>
+                            )
+                        })
+                    }
+                </TableBody>
+            </Table>
+        </div>
+    )
 }
 
 export default App

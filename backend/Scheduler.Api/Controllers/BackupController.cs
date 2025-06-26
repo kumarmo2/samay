@@ -65,4 +65,11 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
         }
         return Ok(new ApiResult<int, string>(id));
     }
+
+    [HttpGet("schedules")]
+    public async Task<IActionResult> GetBackupSchedules()
+    {
+        var schedules = await _scheduleDao.List() ?? Enumerable.Empty<sm.Schedule>();
+        return Ok(new ApiResult<IEnumerable<sm.Schedule>, string>(schedules));
+    }
 }
