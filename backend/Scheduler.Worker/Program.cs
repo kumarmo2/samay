@@ -9,6 +9,11 @@ var services = builder.Services;
 services.AddDatabaseConnection(builder.Configuration);
 services.AddSingleton<IScheduleDao, SchedulerDao>();
 
+services.AddSingleton<IBackupService, BackupService>();
+
+
+var sp = services.BuildServiceProvider();
+sp.GetService<IBackupService>()?.Start();
 
 
 var host = builder.Build();
