@@ -15,6 +15,11 @@ services:
     ports:
       - "8081:80"
 
+  worker:
+    build:
+      context: ./backend/samay-worker-go
+      dockerfile: worker.Dockerfile
+
   envoy:
     image: envoyproxy/envoy:v1.33.0
     ports:
