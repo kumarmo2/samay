@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: ./backend
+      dockerfile: api.Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - "${DATA_PATH}:${DATA_PATH}"
+      - "${BACK_PATH}:${BACK_PATH}"
+  ui:
+    build:
+      context: ./frontend/scheduler-ui
+      dockerfile: scheduler-ui.Dockerfile
+    ports:
+      - "8081:80"
+
+  envoy:
+    image: envoyproxy/envoy:v1.33.0
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./infra/envoy-docker.yml:/etc/envoy/envoy.yaml

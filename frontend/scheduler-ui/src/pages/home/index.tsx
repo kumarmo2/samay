@@ -12,6 +12,9 @@ type BackupScheduleRequest = {
     cronExpression: string;
 }
 
+const defaultSrcPath = import.meta.env.VITE_DEFAULT_SRC_PATH || "/home/kumarmo2/dev";
+const defaultDestPath = import.meta.env.VITE_DEFAULT_DEST_PATH || "/home/kumarmo2/temp";
+
 export type Schedule = {
     id: number;
     srcPath: string;
@@ -61,7 +64,7 @@ function HomeComponent() {
 
     return (
         <div className="flex flex-col">
-            <Scheduler initSrcPath="/home/kumarmo2/dev" initDestPath="/home/kumarmo2/temp" initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
+            <Scheduler initSrcPath={defaultSrcPath} initDestPath={defaultDestPath} initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
             <SchedulesTable schedules={schedules} onDeleteClick={handleDelete} />
         </div>
     )

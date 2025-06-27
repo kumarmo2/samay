@@ -2,14 +2,14 @@
 import { isDigit } from ".";
 import type { Result } from "./result";
 
-export enum TokenType {
+enum TokenType {
     Number,
     Star,
     Slash,
     Dash,
 }
 
-export type Token = {
+type Token = {
     type: TokenType,
     value?: number | string,
 }

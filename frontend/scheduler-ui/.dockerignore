@@ -1,0 +1,35 @@
+# Node modules (will be reinstalled inside the container)
+node_modules
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Build output (optional - if not used for build context)
+dist
+build
+
+# Git
+.git
+.gitignore
+
+# OS/Editor files
+.DS_Store
+*.swp
+*.swo
+
+# Dockerfile itself
+Dockerfile
+.dockerignore
+
+# Environment files (optional - if secrets)
+# .env
+# .env.local
+# .env.*.local
+
+# IDE files
+.vscode
+.idea
+
