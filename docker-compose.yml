@@ -18,6 +18,6 @@ services:
   envoy:
     image: envoyproxy/envoy:v1.33.0
     ports:
-      - "9000:9000"
+      - "9090:9090"
     volumes:
       - ./infra/envoy-docker.yml:/etc/envoy/envoy.yaml
