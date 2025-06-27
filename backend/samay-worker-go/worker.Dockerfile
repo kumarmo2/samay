@@ -19,6 +19,11 @@ FROM debian:bookworm-slim
 
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    rsync \
+    ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
+
 # Install CA certificates (needed for HTTPS requests in many CLI tools)
 # RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && \
 #     rm -rf /var/lib/apt/lists/*
