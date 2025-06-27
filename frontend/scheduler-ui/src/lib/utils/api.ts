@@ -3,6 +3,7 @@ export type ApiResult<T, E> =
     | { ok: null | undefined, err: E };
 
 
+
 export function isSuccess<T, E>(res?: ApiResult<T, E>): res is { ok: T, err: undefined | null } {
     return !!res?.ok
 }
@@ -31,4 +32,27 @@ export const post = async<T, E>(path: string, body?: any, options?: RequestInit)
     const res = await fetch(path, options);
     return res.json() as Promise<ApiResult<T, E>>;
 
+}
+
+export const put = async <T, E>(path: string, reqBody?: any, options?: RequestInit): Promise<ApiResult<T, E>> => {
+    options = options || {};
+    options.method = "PUT";
+    options.headers = options.headers || {};
+    options.headers = {
+        ...options.headers,
+        ["Content-type"]: "application/json"
+    }
+    if (reqBody) {
+        options.body = JSON.stringify(reqBody);
+    }
+    const res = await fetch(path, options);
+    return res.json() as Promise<ApiResult<T, E>>;
+}
+
+export const deleteRequest = async <T, E>(path: string, options?: RequestInit): Promise<ApiResult<T, E>> => {
+    options = options || {};
+    options.method = "DELETE";
+    options.headers = options.headers || {};
+    const res = await fetch(path, options);
+    return res.json() as Promise<ApiResult<T, E>>;
 }

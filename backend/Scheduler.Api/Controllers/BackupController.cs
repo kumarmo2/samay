@@ -72,4 +72,47 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
         var schedules = await _scheduleDao.List() ?? Enumerable.Empty<sm.Schedule>();
         return Ok(new ApiResult<IEnumerable<sm.Schedule>, string>(schedules));
     }
+
+
+    [HttpGet("schedules/{id}")]
+    public async Task<IActionResult> GetSchedule(int id)
+    {
+        var schedule = await _scheduleDao.Get(id);
+        return Ok(new ApiResult<sm.Schedule, string>(schedule));
+    }
+
+    [HttpPut("schedules/{id}")]
+    public async Task<IActionResult> Edit(int id, [FromBody] BackupScheduleRequest request)
+    {
+        if (request == null)
+        {
+            return BadRequest(new ApiResult<object, string>("Request cannot be null"));
+        }
+        if (id <= 0)
+        {
+            return BadRequest(new ApiResult<object, string>("Invalid id"));
+        }
+        var schedule = await _scheduleDao.Get(id);
+        if (schedule == null)
+        {
+            return BadRequest(new ApiResult<object, string>("Schedule does not exist"));
+        }
+        schedule.CronExpression = request.CronExpression;
+        schedule.SrcPath = request.SrcPath;
+        schedule.DestPath = request.DestPath;
+        await _scheduleDao.Update(schedule);
+        return Ok(new ApiResult<string, object>("updated"));
+    }
+
+    [HttpDelete("schedules/{id}")]
+    public async Task<IActionResult> Delete(int id)
+    {
+        var schedule = await _scheduleDao.Get(id);
+        if (schedule == null)
+        {
+            return BadRequest(new ApiResult<object, string>("Schedule does not exist"));
+        }
+        await _scheduleDao.Delete(id);
+        return Ok(new ApiResult<string, object>("deleted"));
+    }
 }

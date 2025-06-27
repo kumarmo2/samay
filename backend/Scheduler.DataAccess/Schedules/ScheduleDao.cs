@@ -15,6 +15,20 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
         return await conn.ExecuteScalarAsync<int>(query, schedule);
     }
 
+    public async Task Delete(int id)
+    {
+        var query = "delete from scheduler.schedules where id = @id";
+        using var conn = dbConnectionFactory.GetConnection();
+        await conn.ExecuteAsync(query, new { id });
+    }
+
+    public async Task<Schedule?> Get(int id)
+    {
+        var query = "select * from scheduler.schedules where id = @id";
+        using var conn = await _dbConnectionFactory.GetConnectionAsync();
+        return await conn.QuerySingleOrDefaultAsync<Schedule>(query, new { id });
+    }
+
     public async Task<Schedule?> GetForSourceAndDest(string srcPath, string destPath)
     {
         var query = "select * from scheduler.schedules where srcpath = @srcPath and destpath = @destPath";
@@ -27,5 +41,12 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
         var query = "select * from scheduler.schedules";
         using var conn = await _dbConnectionFactory.GetConnectionAsync();
         return [.. await conn.QueryAsync<Schedule>(query)];
+    }
+
+    public async Task Update(Schedule schedule)
+    {
+        var query = "update scheduler.schedules set name = @name, srcpath = @srcPath, destpath = @destPath, cronexpression = @cronExpression where id = @id";
+        using var conn = await _dbConnectionFactory.GetConnectionAsync();
+        await conn.ExecuteAsync(query, schedule);
     }
 }

@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
-import { get, post } from "../../lib/utils/api";
-import { goUpAdirectory } from "../../lib/utils/path";
+import { deleteRequest, get, post } from "../../lib/utils/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Link } from "react-router";
 import { Scheduler } from "@/components/custom/scheduler";
+import { Button } from "@/components/ui/button";
 
 
 type BackupScheduleRequest = {
@@ -13,24 +12,11 @@ type BackupScheduleRequest = {
     cronExpression: string;
 }
 
-type Schedule = {
+export type Schedule = {
     id: number;
     srcPath: string;
     destPath: string;
     cronExpression: string;
-}
-
-const handlePathChange = (newValue: string, currValue: string, setPath: (value: string) => void) => {
-    console.log("path value: ", newValue);
-    if (newValue !== "..") {
-        setPath(newValue);
-        return;
-    }
-    console.log("path value: ", newValue);
-    if (currValue === "/") {
-        throw new Error("Already at root");
-    }
-    setPath(goUpAdirectory(currValue));
 }
 
 function HomeComponent() {
@@ -62,17 +48,26 @@ function HomeComponent() {
         alert("Successfully created the schedule.");
     }
 
+    const handleDelete = async (id: number) => {
+        const res = await deleteRequest<string, any>(`/api/backup/schedules/${id}`);
+        if (!res.ok) {
+            alert(res.err || "Internal server error");
+            return;
+        }
+        const newSchedules = schedules.filter(schedule => schedule.id !== id);
+        setSchedules(newSchedules);
+        alert("Successfully deleted the schedule.");
+    }
+
     return (
         <div className="flex flex-col">
             <Scheduler initSrcPath="/home/kumarmo2/dev" initDestPath="/home/kumarmo2/temp" initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
-            <SchedulesTable schedules={schedules} />
+            <SchedulesTable schedules={schedules} onDeleteClick={handleDelete} />
         </div>
     )
 }
 
-
-
-const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
+const SchedulesTable = ({ schedules, onDeleteClick }: { schedules: Schedule[], onDeleteClick: (id: number) => void }) => {
     return (
         <div className="flex flex-col">
             <Table>
@@ -82,6 +77,7 @@ const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
                         <TableHead>Destination Path</TableHead>
                         <TableHead>Cron Expression</TableHead>
                         <TableHead>Edit</TableHead>
+                        <TableHead>Delete</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -93,6 +89,7 @@ const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
                                     <TableCell>{schedule.destPath}</TableCell>
                                     <TableCell>{schedule.cronExpression}</TableCell>
                                     <TableCell><Link to={`/edit/${schedule.id}`}>Edit</Link></TableCell>
+                                    <TableCell><Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button></TableCell>
                                 </TableRow>
                             )
                         })
