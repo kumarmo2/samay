@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "../../components/ui/too
 import { CronExpression } from "../../CronComponent";
 import type { Maybe, Result } from "../../lib/utils/result";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
+import { Link } from "react-router";
 
 const defaultPath = () => "/home/kumarmo2";
 const defaultBackupDir = () => "/home/kumarmo2/temp"
@@ -269,6 +270,7 @@ const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
                         <TableHead>Source Path</TableHead>
                         <TableHead>Destination Path</TableHead>
                         <TableHead>Cron Expression</TableHead>
+                        <TableHead>Edit</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -279,6 +281,7 @@ const SchedulesTable = ({ schedules }: { schedules: Schedule[] }) => {
                                     <TableCell>{schedule.srcPath}</TableCell>
                                     <TableCell>{schedule.destPath}</TableCell>
                                     <TableCell>{schedule.cronExpression}</TableCell>
+                                    <TableCell><Link to={`/edit/${schedule.id}`}>Edit</Link></TableCell>
                                 </TableRow>
                             )
                         })

@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router";
 import HomeComponent from "./pages/home/index";
+import Edit from "./pages/edit";
 
 
 export const hours = Array.from({ length: 24 }, (_, i) => i)
@@ -12,6 +13,7 @@ function App() {
         <div className="flex flex-col items-center h-screen py-10 mx-10 border-red-300 border-x">
             <Routes>
                 <Route path="/" element={<HomeComponent />} />
+                <Route path="/edit/:id" element={<Edit />} />
             </Routes>
         </div>
 
