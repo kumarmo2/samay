@@ -1,0 +1,15 @@
+[Unit]
+Description=Samay Docker compose
+After=docker.service
+
+[Service]
+WorkingDirectory=/home/kumarmo2/dev/kumarmo2/samay
+ExecStartPre=docker compose build
+ExecStart=docker compose up
+ExecStop=docker compose down
+TimeoutStartSec=0
+Restart=always
+# User=root
+
+[Install]
+WantedBy=multi-user.target
