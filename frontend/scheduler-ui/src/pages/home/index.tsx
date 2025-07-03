@@ -15,7 +15,7 @@ type BackupScheduleRequest = {
 }
 
 const defaultSrcPath = import.meta.env.VITE_DEFAULT_SRC_PATH || "/home/kumarmo2/dev";
-const defaultDestPath = import.meta.env.VITE_DEFAULT_DEST_PATH || "/home/kumarmo2/temp";
+const defaultDestPath = import.meta.env.VITE_DEFAULT_DEST_PATH || "/media/kumarmo2/kumarmo2-hdd-1/backups";
 
 export type Schedule = {
     id: number;
