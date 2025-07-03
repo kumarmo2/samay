@@ -4,6 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from ".
 import { Link } from "react-router";
 import { Scheduler } from "@/components/custom/scheduler";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import React from "react";
 
 
 type BackupScheduleRequest = {
@@ -24,6 +26,8 @@ export type Schedule = {
 
 function HomeComponent() {
     const [schedules, setSchedules] = useState<Schedule[]>([]);
+    const [showModal, setShowModal] = useState(false);
+    const deleteRef = React.useRef<number>(null);
 
 
     const fetchSchedules = async () => {
@@ -51,6 +55,12 @@ function HomeComponent() {
         alert("Successfully created the schedule.");
     }
 
+    const handleDeleteClick = async (id: number) => {
+        deleteRef.current = id;
+        console.log("deleteRef.current: ", deleteRef.current);
+        setShowModal(true);
+    }
+
     const handleDelete = async (id: number) => {
         const res = await deleteRequest<string, any>(`/api/backup/schedules/${id}`);
         if (!res.ok) {
@@ -59,14 +69,35 @@ function HomeComponent() {
         }
         const newSchedules = schedules.filter(schedule => schedule.id !== id);
         setSchedules(newSchedules);
+        setShowModal(false);
         alert("Successfully deleted the schedule.");
+    }
+
+    const handleDeleteConfirm = async () => {
+        const id = deleteRef.current;
+        console.log("id: ", id);
+        if (!id) {
+            return;
+        }
+        await handleDelete(id);
     }
 
     return (
         <div className="flex flex-col">
+            <Dialog open={showModal} onOpenChange={() => setShowModal(!showModal)}>
+                <DialogContent>
+                    <div className="px-1 text-center flex flex-col gap-2">
+                        <DialogTitle className="text-xl font-bold">Are you sure you want to delete this schedule?</DialogTitle>
+                        <div className="flex justify-around">
+                            <Button onClick={handleDeleteConfirm} variant="destructive">Delete</Button>
+                            <Button>Cancel</Button>
+                        </div>
+                    </div>
+                </DialogContent>
+            </Dialog>
             <Scheduler initSrcPath={defaultSrcPath} initDestPath={defaultDestPath} initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
-            <SchedulesTable schedules={schedules} onDeleteClick={handleDelete} />
-        </div>
+            <SchedulesTable schedules={schedules} onDeleteClick={handleDeleteClick} />
+        </div >
     )
 }
 
