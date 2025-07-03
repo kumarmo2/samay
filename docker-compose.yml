@@ -15,16 +15,6 @@ services:
     ports:
       - "8081:80"
 
-  worker:
-    build:
-      context: ./backend/samay-worker-go
-      dockerfile: worker.Dockerfile
-    volumes:
-      - "${DATA_PATH}:${DATA_PATH}"
-      - "${BACK_PATH}:${BACK_PATH}"
-      - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
-
   envoy:
     image: envoyproxy/envoy:v1.33.0
     ports:
