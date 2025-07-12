@@ -12,6 +12,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var services = builder.Services;
         services.AddControllers();
+        services.AddLogging();
         services.AddDatabaseConnection(builder.Configuration);
 
 

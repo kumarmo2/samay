@@ -7,3 +7,5 @@ create table if not exists scheduler.schedules(
     destpath text not null,
     cronexpression text not null
 );
+
+alter table scheduler.schedules add column if not exists enabled boolean default true;

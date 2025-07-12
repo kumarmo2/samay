@@ -1,5 +1,6 @@
 using Scheduler.Models;
 using Dapper;
+using Scheduler.Dtos;
 
 namespace Scheduler.DataAccess.Schedules;
 
@@ -38,7 +39,7 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
 
     public async Task<List<Schedule>> List()
     {
-        var query = "select * from scheduler.schedules";
+        var query = "select * from scheduler.schedules order by id";
         using var conn = await _dbConnectionFactory.GetConnectionAsync();
         return [.. await conn.QueryAsync<Schedule>(query)];
     }
@@ -48,5 +49,32 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
         var query = "update scheduler.schedules set name = @name, srcpath = @srcPath, destpath = @destPath, cronexpression = @cronExpression where id = @id";
         using var conn = await _dbConnectionFactory.GetConnectionAsync();
         await conn.ExecuteAsync(query, schedule);
+    }
+
+    public async Task PartialUpdate(int id, BackupSchedulePartialUpdateRequest request)
+    {
+        var parameters = new DynamicParameters();
+        parameters.Add("id", id);
+
+        var columns = new List<string>();
+        if (request.Enabled != null)
+        {
+            columns.Add("enabled");
+            parameters.Add("enabled", request.Enabled);
+        }
+
+        var query = $"update scheduler.schedules set\n";
+        var setColumns = new List<string>();
+        foreach (var column in columns)
+        {
+            setColumns.Add($" {column} = @{column}");
+        }
+        query += string.Join(",\n", setColumns);
+        query += "\nwhere id = @id";
+
+
+        using var conn = await _dbConnectionFactory.GetConnectionAsync();
+        await conn.ExecuteAsync(query, parameters);
+
     }
 }

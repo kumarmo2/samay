@@ -8,4 +8,9 @@ public class BackupScheduleRequest
     public string CronExpression { get; set; } = string.Empty;
 }
 
+public class BackupSchedulePartialUpdateRequest
+{
+    public bool? Enabled { get; set; }
+}
+
 

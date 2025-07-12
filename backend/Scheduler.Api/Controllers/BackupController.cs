@@ -6,9 +6,10 @@ using sm = Scheduler.Models;
 namespace Scheduler.Api.Controllers;
 
 
-public class BackupController(IScheduleDao scheduleDao) : BaseApiController
+public class BackupController(IScheduleDao scheduleDao, ILogger<BackupController> logger) : BaseApiController
 {
     private readonly IScheduleDao _scheduleDao = scheduleDao;
+    private readonly ILogger<BackupController> _logger = logger;
 
     [HttpPost]
     public async Task<IActionResult> CreateBackupSchedule([FromBody] BackupScheduleRequest? request)
@@ -79,6 +80,38 @@ public class BackupController(IScheduleDao scheduleDao) : BaseApiController
     {
         var schedule = await _scheduleDao.Get(id);
         return Ok(new ApiResult<sm.Schedule, string>(schedule));
+    }
+
+    [HttpPut("schedules/{id}/update")]
+    public async Task<IActionResult> PartialUpdate(int id, [FromBody] BackupSchedulePartialUpdateRequest request)
+    {
+        if (request == null)
+        {
+            return BadRequest(new ApiResult<object, string>("Request cannot be null"));
+        }
+        {
+            _logger.LogInformation("PartialUpdate: id: {id}, request.Enabled: {request.Enabled}", id, request.Enabled);
+        }
+        _logger.LogInformation($"PartialUpdate: id: {id}, request.Enabled: {request.Enabled}");
+        var isAnythingChanged = false;
+        if (request.Enabled != null)
+        {
+            isAnythingChanged = true;
+        }
+
+        if (!isAnythingChanged)
+        {
+            return Ok(new ApiResult<object, string>("Nothing to update"));
+        }
+
+        var schedule = await _scheduleDao.Get(id);
+        if (schedule == null || schedule.Id != id)
+        {
+            return Ok(new ApiResult<object, string>("Schedule does not exist"));
+        }
+
+        await _scheduleDao.PartialUpdate(id, request);
+        return Ok(new ApiResult<string, object>("updated"));
     }
 
     [HttpPut("schedules/{id}")]
