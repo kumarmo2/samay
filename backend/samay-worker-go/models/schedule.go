@@ -6,4 +6,5 @@ type Schedule struct {
 	SrcPath        string  `db:"srcpath" json:"srcPath"`
 	DestPath       string  `db:"destpath" json:"destPath"`
 	CronExpression string  `db:"cronexpression" json:"cronExpression"`
+	Enabled        bool    `db:"enabled" json:"enabled"`
 }

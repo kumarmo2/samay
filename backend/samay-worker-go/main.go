@@ -26,7 +26,7 @@ func main() {
 	}
 	wp.Start()
 
-	query := "select * from scheduler.schedules"
+	query := "select * from scheduler.schedules where enabled = true"
 	schedules := []models.Schedule{}
 	for {
 		now := time.Now()
@@ -35,6 +35,7 @@ func main() {
 			log.Println(err)
 			continue
 		}
+		log.Println("found schedules: ", len(schedules))
 
 		for _, schedule := range schedules {
 			sch, err := cronParser.Parse(schedule.CronExpression)
