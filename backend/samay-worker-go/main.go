@@ -169,26 +169,6 @@ func createLogEntry(stdoutBuf *bytes.Buffer, stderrBuf *bytes.Buffer, exitCode i
 	return fmt.Sprintf("stdout: %s\n, stderr: %s\n, exitcode: %d\n, error: %s", stdoutStr, stderrStr, exitCode, err)
 }
 
-func backupWork(schedule models.Schedule, db *sqlx.DB) {
-
-	// cmd := exec.Command("rsync", "-rPavh", schedule.SrcPath, schedule.DestPath)
-	//
-	// cmd.Stdout = os.Stdout
-	// cmd.Stderr = os.Stderr
-	//
-	// err := cmd.Start()
-	// if err != nil {
-	// 	log.Println("error while running rsync: ", err)
-	// 	return
-	// }
-	// err = cmd.Wait()
-	// if err != nil {
-	// 	log.Println("error while running rsync: ", err)
-	// 	return
-	// }
-	// log.Println("backup success: ", schedule.SrcPath, " -> ", schedule.DestPath, " , exitcode: ", cmd.ProcessState.ExitCode())
-}
-
 type BackupWork struct {
 	db *sqlx.DB
 }
