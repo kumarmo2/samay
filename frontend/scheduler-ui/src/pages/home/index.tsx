@@ -1,17 +1,24 @@
-import { useEffect, useState } from "react";
-import { deleteRequest, get, post } from "../../lib/utils/api";
+import { useCallback, useEffect, useState } from "react";
+import { deleteRequest, get, post, put } from "../../lib/utils/api";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../../components/ui/table";
 import { Link } from "react-router";
 import { Scheduler } from "@/components/custom/scheduler";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import React from "react";
+import FullPageLoader from "@/components/custom/full-page-loader";
+import { Checkbox } from "@/components/ui/checkbox";
+import type { CheckedState } from "@radix-ui/react-checkbox";
 
 
 type BackupScheduleRequest = {
     srcPath: string;
     destPath: string;
     cronExpression: string;
+}
+
+type BackupSchedulePartialUpdateRequest = {
+    enabled?: boolean;
 }
 
 const defaultSrcPath = import.meta.env.VITE_DEFAULT_SRC_PATH || "/home/kumarmo2/dev";
@@ -22,12 +29,14 @@ export type Schedule = {
     srcPath: string;
     destPath: string;
     cronExpression: string;
+    enabled: boolean;
 }
 
 function HomeComponent() {
     const [schedules, setSchedules] = useState<Schedule[]>([]);
     const [showModal, setShowModal] = useState(false);
     const deleteRef = React.useRef<number>(null);
+    const [isLoading, setIsLoading] = React.useState(false);
 
 
     const fetchSchedules = async () => {
@@ -82,8 +91,38 @@ function HomeComponent() {
         await handleDelete(id);
     }
 
+    const handleEnableCheck = useCallback(async (id: number, checked: boolean) => {
+        const requestBody: BackupSchedulePartialUpdateRequest = {
+            enabled: checked
+        }
+        setIsLoading(true);
+        try {
+            const res = await put<any, string>(`/api/backup/schedules/${id}/update`, requestBody)
+            setIsLoading(false);
+            if (!res.ok) {
+                alert(res.err || "Internal server error");
+                return;
+            }
+            const newSchedules = schedules.map(schedule => {
+                if (schedule.id !== id) {
+                    return schedule;
+                }
+                const newSchedule = { ...schedule, enabled: checked };
+                return newSchedule;
+            })
+            setSchedules(newSchedules);
+        } catch (e) {
+            console.log("error: ", e);
+            setIsLoading(false);
+        }
+    }, [schedules])
+
+
     return (
         <div className="flex flex-col">
+            {
+                isLoading && <FullPageLoader />
+            }
             <Dialog open={showModal} onOpenChange={() => setShowModal(!showModal)}>
                 <DialogContent>
                     <div className="px-1 text-center flex flex-col gap-2">
@@ -96,12 +135,28 @@ function HomeComponent() {
                 </DialogContent>
             </Dialog>
             <Scheduler initSrcPath={defaultSrcPath} initDestPath={defaultDestPath} initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
-            <SchedulesTable schedules={schedules} onDeleteClick={handleDeleteClick} />
+            <SchedulesTable handleToggleEnabled={handleEnableCheck} schedules={schedules} onDeleteClick={handleDeleteClick} />
         </div >
     )
 }
 
-const SchedulesTable = ({ schedules, onDeleteClick }: { schedules: Schedule[], onDeleteClick: (id: number) => void }) => {
+type SchedulesTableProps = {
+    handleToggleEnabled: (id: number, checked: boolean) => void;
+    schedules: Schedule[];
+    onDeleteClick: (id: number) => void;
+}
+
+const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: SchedulesTableProps) => {
+    const handleCheckClick = (id: number, checked: CheckedState) => {
+        if (checked === "indeterminate") {
+            return;
+        }
+        if (checked == true) {
+        }
+        console.log("checked: ", checked);
+        handleToggleEnabled(id, checked);
+    }
+
     return (
         <div className="flex flex-col">
             <Table>
@@ -112,6 +167,7 @@ const SchedulesTable = ({ schedules, onDeleteClick }: { schedules: Schedule[], o
                         <TableHead>Cron Expression</TableHead>
                         <TableHead>Edit</TableHead>
                         <TableHead>Delete</TableHead>
+                        <TableHead>Enabled</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -124,6 +180,7 @@ const SchedulesTable = ({ schedules, onDeleteClick }: { schedules: Schedule[], o
                                     <TableCell>{schedule.cronExpression}</TableCell>
                                     <TableCell><Link to={`/edit/${schedule.id}`}>Edit</Link></TableCell>
                                     <TableCell><Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button></TableCell>
+                                    <TableCell><Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} /></TableCell>
                                 </TableRow>
                             )
                         })

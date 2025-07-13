@@ -1,3 +1,4 @@
+using Scheduler.Dtos;
 using Scheduler.Models;
 
 namespace Scheduler.DataAccess.Schedules;
@@ -10,4 +11,5 @@ public interface IScheduleDao
     Task Update(Schedule schedule);
     Task Delete(int id);
     Task<int> Create(Schedule schedule);
+    Task PartialUpdate(int id, BackupSchedulePartialUpdateRequest request);
 }

@@ -14,4 +14,5 @@ public class Schedule
     // so either we need use `required` modifier or `null!` to fix.
 
     public required string CronExpression { get; set; }
+    public bool Enabled { get; set; }
 }

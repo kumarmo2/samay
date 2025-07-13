@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Scheduler.Models\Scheduler.Models.csproj" />
+    <ProjectReference Include="..\Scheduler.Dtos\Scheduler.Dtos.csproj" />
   </ItemGroup>
 
 </Project>
