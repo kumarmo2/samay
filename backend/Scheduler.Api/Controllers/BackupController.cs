@@ -89,10 +89,6 @@ public class BackupController(IScheduleDao scheduleDao, ILogger<BackupController
         {
             return BadRequest(new ApiResult<object, string>("Request cannot be null"));
         }
-        {
-            _logger.LogInformation("PartialUpdate: id: {id}, request.Enabled: {request.Enabled}", id, request.Enabled);
-        }
-        _logger.LogInformation($"PartialUpdate: id: {id}, request.Enabled: {request.Enabled}");
         var isAnythingChanged = false;
         if (request.Enabled != null)
         {
