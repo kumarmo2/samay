@@ -1,3 +1,4 @@
+using Scheduler.Models;
 namespace Scheduler.Dtos;
 
 
@@ -11,6 +12,13 @@ public class BackupScheduleRequest
 public class BackupSchedulePartialUpdateRequest
 {
     public bool? Enabled { get; set; }
+}
+
+
+public class ScheduleDashoardItem : Schedule
+{
+    public DateTime? LastCompletedAt { get; set; }
+    public int? ExitCode { get; set; }
 }
 
 

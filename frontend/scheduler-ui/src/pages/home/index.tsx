@@ -24,23 +24,25 @@ type BackupSchedulePartialUpdateRequest = {
 const defaultSrcPath = import.meta.env.VITE_DEFAULT_SRC_PATH || "/home/kumarmo2/dev";
 const defaultDestPath = import.meta.env.VITE_DEFAULT_DEST_PATH || "/media/kumarmo2/kumarmo2-hdd-1/backups";
 
-export type Schedule = {
+export type ScheduleDashoardItem = {
     id: number;
     srcPath: string;
     destPath: string;
     cronExpression: string;
     enabled: boolean;
+    lastCompletedAt?: string;
+    exitCode?: number;
 }
 
 function HomeComponent() {
-    const [schedules, setSchedules] = useState<Schedule[]>([]);
+    const [schedules, setSchedules] = useState<ScheduleDashoardItem[]>([]);
     const [showModal, setShowModal] = useState(false);
     const deleteRef = React.useRef<number>(null);
     const [isLoading, setIsLoading] = React.useState(false);
 
 
     const fetchSchedules = async () => {
-        const res = await get<Schedule[], string>("/api/backup/schedules");
+        const res = await get<ScheduleDashoardItem[], string>("/api/backup/schedules");
         if (!res.ok) {
             return;
         }
@@ -142,7 +144,7 @@ function HomeComponent() {
 
 type SchedulesTableProps = {
     handleToggleEnabled: (id: number, checked: boolean) => void;
-    schedules: Schedule[];
+    schedules: ScheduleDashoardItem[];
     onDeleteClick: (id: number) => void;
 }
 
@@ -168,6 +170,8 @@ const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: Sched
                         <TableHead>Edit</TableHead>
                         <TableHead>Delete</TableHead>
                         <TableHead>Enabled</TableHead>
+                        <TableHead>Last Completed At</TableHead>
+                        <TableHead>Exit Code</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -181,6 +185,8 @@ const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: Sched
                                     <TableCell><Link to={`/edit/${schedule.id}`}>Edit</Link></TableCell>
                                     <TableCell><Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button></TableCell>
                                     <TableCell><Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} /></TableCell>
+                                    <TableCell>{schedule.lastCompletedAt}</TableCell>
+                                    <TableCell>{schedule.exitCode}</TableCell>
                                 </TableRow>
                             )
                         })

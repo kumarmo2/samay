@@ -70,8 +70,8 @@ public class BackupController(IScheduleDao scheduleDao, ILogger<BackupController
     [HttpGet("schedules")]
     public async Task<IActionResult> GetBackupSchedules()
     {
-        var schedules = await _scheduleDao.List() ?? Enumerable.Empty<sm.Schedule>();
-        return Ok(new ApiResult<IEnumerable<sm.Schedule>, string>(schedules));
+        var schedules = await _scheduleDao.GetDashboardList() ?? Enumerable.Empty<ScheduleDashoardItem>();
+        return Ok(new ApiResult<IEnumerable<ScheduleDashoardItem>, string>(schedules));
     }
 
 

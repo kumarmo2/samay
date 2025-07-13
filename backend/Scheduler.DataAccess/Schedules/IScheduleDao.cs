@@ -11,5 +11,6 @@ public interface IScheduleDao
     Task Update(Schedule schedule);
     Task Delete(int id);
     Task<int> Create(Schedule schedule);
+    Task<List<ScheduleDashoardItem>> GetDashboardList();
     Task PartialUpdate(int id, BackupSchedulePartialUpdateRequest request);
 }
