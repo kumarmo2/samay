@@ -69,7 +69,7 @@ func main() {
 				backupWork.backupWork(schedule)
 			})
 		}
-		time.Sleep(time.Second * 6)
+		time.Sleep(time.Second * 60)
 	}
 
 }
@@ -103,8 +103,6 @@ func (bw *BackupWork) backupWork(schedule models.Schedule) {
 	}()
 
 	wg.Wait()
-	log.Println("scheduledBackupRunType: ", scheduledBackupRunType)
-	log.Println("scheduledBackupRunStatus: ", scheduledBackupRunStatus)
 
 	if scheduledBackupRunStatusError != nil {
 		log.Println("error while getting backuprunstatus: ", scheduledBackupRunStatusError)
