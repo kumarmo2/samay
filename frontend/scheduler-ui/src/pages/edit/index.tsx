@@ -25,8 +25,9 @@ const Edit = () => {
 
 
     const handleSubmitClick = async ({ srcPath, destPath, cronExpression }: { srcPath: string, destPath: string, cronExpression: string }) => {
+        const enabled = schedule?.enabled || true;
         const requestBody: Schedule = {
-            id: idInt, srcPath, destPath, cronExpression
+            id: idInt, srcPath, destPath, cronExpression, enabled
         }
         console.log("edit request body: ", requestBody);
         const res = await put<Schedule, any>(`/api/backup/schedules/${idInt}`, requestBody)
@@ -34,7 +35,7 @@ const Edit = () => {
             alert(res.err || "Internal server error");
             return;
         }
-        setSchedule({ cronExpression, srcPath, destPath, id: idInt });
+        setSchedule({ cronExpression, srcPath, destPath, id: idInt, enabled });
         alert("Successfully updated the schedule.");
     }
 
