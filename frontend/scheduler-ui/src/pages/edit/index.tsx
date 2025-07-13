@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router"
-import type { Schedule } from "../home"
 import { get, put } from "@/lib/utils/api"
 import type { Maybe } from "@/lib/utils"
 import { Scheduler } from "@/components/custom/scheduler"
 
+export type ScheduleDetails = {
+    id: number;
+    srcPath: string;
+    destPath: string;
+    cronExpression: string;
+    enabled: boolean;
+}
 const Edit = () => {
     let { id } = useParams()
     const idInt = +(id || 0)
-    const [schedule, setSchedule] = useState<Maybe<Schedule>>(null)
+    const [schedule, setSchedule] = useState<Maybe<ScheduleDetails>>(null)
 
     useEffect(() => {
         const fn = async () => {
 
-            const res = await get<Schedule, string>(`/api/backup/schedules/${idInt}`);
+            const res = await get<ScheduleDetails, string>(`/api/backup/schedules/${idInt}`);
             if (!res.ok) {
                 return;
             }
@@ -26,11 +32,11 @@ const Edit = () => {
 
     const handleSubmitClick = async ({ srcPath, destPath, cronExpression }: { srcPath: string, destPath: string, cronExpression: string }) => {
         const enabled = schedule?.enabled || true;
-        const requestBody: Schedule = {
+        const requestBody: ScheduleDetails = {
             id: idInt, srcPath, destPath, cronExpression, enabled
         }
         console.log("edit request body: ", requestBody);
-        const res = await put<Schedule, any>(`/api/backup/schedules/${idInt}`, requestBody)
+        const res = await put<ScheduleDetails, any>(`/api/backup/schedules/${idInt}`, requestBody)
         if (!res.ok) {
             alert(res.err || "Internal server error");
             return;

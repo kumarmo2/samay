@@ -44,6 +44,21 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
         return [.. await conn.QueryAsync<Schedule>(query)];
     }
 
+
+    public async Task<List<ScheduleDashoardItem>> GetDashboardList()
+    {
+        var query = @"
+            with cte as (
+                    select scheduleid, completedat, exitcode, rank() over (partition by scheduleid order by completedat desc) as rank
+                    from scheduler.backupruns
+            )
+            select s.*, c.completedat as lastcompletedat, c.exitcode
+            from scheduler.schedules s left join cte c on s.id = c.scheduleid and c.rank = 1
+            order by id";
+        using var conn = await _dbConnectionFactory.GetConnectionAsync();
+        return [.. await conn.QueryAsync<ScheduleDashoardItem>(query)];
+    }
+
     public async Task Update(Schedule schedule)
     {
         var query = "update scheduler.schedules set name = @name, srcpath = @srcPath, destpath = @destPath, cronexpression = @cronExpression where id = @id";
@@ -75,6 +90,5 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
 
         using var conn = await _dbConnectionFactory.GetConnectionAsync();
         await conn.ExecuteAsync(query, parameters);
-
     }
 }
