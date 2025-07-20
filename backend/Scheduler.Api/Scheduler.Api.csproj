@@ -4,6 +4,7 @@
     <ProjectReference Include="..\Scheduler.Dtos\Scheduler.Dtos.csproj" />
     <ProjectReference Include="..\Scheduler.DataAccess\Scheduler.DataAccess.csproj" />
     <ProjectReference Include="..\Scheduler.Models\Scheduler.Models.csproj" />
+    <ProjectReference Include="..\..\libs\dotnet-libs\Kumarmo2.Rabbitmq\Kumarmo2.Rabbitmq.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
