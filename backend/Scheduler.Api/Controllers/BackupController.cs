@@ -1,8 +1,10 @@
 using Kumarmo2.Rabbitmq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Scheduler.Api.Utils;
 using Scheduler.DataAccess.Schedules;
 using Scheduler.Dtos;
+using Scheduler.Models;
 using sm = Scheduler.Models;
 
 namespace Scheduler.Api.Controllers;
@@ -10,11 +12,13 @@ namespace Scheduler.Api.Controllers;
 
 public class BackupController(IScheduleDao scheduleDao,
         ILogger<BackupController> logger,
-        IRabbitMqManager rabbitMqManager) : BaseApiController
+        IRabbitMqManager rabbitMqManager,
+        IBackupRunDao backupRunDao) : BaseApiController
 {
     private readonly IScheduleDao _scheduleDao = scheduleDao;
     private readonly ILogger<BackupController> _logger = logger;
     private readonly IRabbitMqManager _rabbitMqManager = rabbitMqManager;
+    private readonly IBackupRunDao _backupRunDao = backupRunDao;
 
     [HttpPost]
     public async Task<IActionResult> CreateBackupSchedule([FromBody] BackupScheduleRequest? request)
@@ -82,6 +86,56 @@ public class BackupController(IScheduleDao scheduleDao,
     {
         var schedule = await _scheduleDao.Get(id);
         return Ok(new ApiResult<sm.Schedule, string>(schedule));
+    }
+
+    [HttpPost("schedules/{id}/run")]
+    public async Task<IActionResult> RunNow(int id)
+    {
+        if (id < 1)
+        {
+            return BadRequest(new ApiResult<object, string>("Invalid id"));
+        }
+        var scheduleTask = _scheduleDao.Get(id);
+        var backupRun = _scheduleDao.GetAnyNotCompletedRun(id);
+
+        await Task.WhenAll(scheduleTask, backupRun);
+        if (scheduleTask.Result is null)
+        {
+            return BadRequest(new ApiResult<object, string>("Schedule does not exist"));
+        }
+        if (backupRun.Result is not null)
+        {
+            return Ok(new ApiResult<object, string>("Backup run is pending"));
+        }
+
+        var run = new BackupRun
+        {
+            BackupRunType = Constants.AdhocBackupRunTypeId,
+            ScheduleId = id,
+            Status = Constants.SubmittedBackupRunStatus,
+        };
+
+        var backupRunId = await _backupRunDao.Create(run);
+        if (backupRunId <= 0)
+        {
+            return Ok(new ApiResult<object, string>("Internal server error"));
+        }
+
+        var dashboardItem = new ScheduleDashoardItem
+        {
+            Id = id,
+            CronExpression = scheduleTask.Result.CronExpression,
+            DestPath = scheduleTask.Result.DestPath,
+            Enabled = scheduleTask.Result.Enabled,
+            Name = scheduleTask.Result.Name,
+            SrcPath = scheduleTask.Result.SrcPath,
+            LastStartTime = run.StartTime,
+            LastCompletedAt = null,
+            ExitCode = null,
+        };
+        // TODO: send message to rabbitmq
+
+        return Ok(new ApiResult<ScheduleDashoardItem, string>(dashboardItem));
     }
 
     [HttpPut("schedules/{id}/update")]

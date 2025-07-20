@@ -43,4 +43,13 @@ create table if not exists scheduler.backupruns(
     logs text
 );
 
+alter table scheduler.backupruns alter column starttime drop default;
+alter table scheduler.backupruns alter column starttime drop not null;
+
+insert into scheduler.backuprunstatus(id, name)
+values
+(3, 'submitted')
+on conflict(id) do nothing;
+
+
 

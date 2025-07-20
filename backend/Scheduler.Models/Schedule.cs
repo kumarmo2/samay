@@ -16,3 +16,23 @@ public class Schedule
     public required string CronExpression { get; set; }
     public bool Enabled { get; set; }
 }
+
+public class BackupRun
+{
+    public int Id { get; set; }
+
+    public int ScheduleId { get; set; }
+
+    public int BackupRunType { get; set; }
+
+    public int Status { get; set; }
+
+    public DateTime? StartTime { get; set; }
+
+    public DateTime? CompletedAt { get; set; }
+
+    public int? ExitCode { get; set; }
+
+    public string? Logs { get; set; }
+}
+

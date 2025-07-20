@@ -21,6 +21,7 @@ public class Program
 
 
         services.AddSingleton<IScheduleDao, SchedulerDao>();
+        services.AddSingleton<IBackupRunDao, BackupRunDao>();
 
         services.ConfigureHttpJsonOptions(options =>
         {

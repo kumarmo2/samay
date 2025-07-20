@@ -18,6 +18,7 @@ public class BackupSchedulePartialUpdateRequest
 public class ScheduleDashoardItem : Schedule
 {
     public DateTime? LastCompletedAt { get; set; }
+    public DateTime? LastStartTime { get; set; }
     public int? ExitCode { get; set; }
 }
 
