@@ -1,0 +1,3 @@
+[submodule "libs/dotnet-libs"]
+	path = libs/dotnet-libs
+	url = git@github.com:kumarmo2/dotnet-libs.git

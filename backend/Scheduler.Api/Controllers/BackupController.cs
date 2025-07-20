@@ -1,4 +1,6 @@
+using Kumarmo2.Rabbitmq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Scheduler.DataAccess.Schedules;
 using Scheduler.Dtos;
 using sm = Scheduler.Models;
@@ -6,10 +8,13 @@ using sm = Scheduler.Models;
 namespace Scheduler.Api.Controllers;
 
 
-public class BackupController(IScheduleDao scheduleDao, ILogger<BackupController> logger) : BaseApiController
+public class BackupController(IScheduleDao scheduleDao,
+        ILogger<BackupController> logger,
+        IRabbitMqManager rabbitMqManager) : BaseApiController
 {
     private readonly IScheduleDao _scheduleDao = scheduleDao;
     private readonly ILogger<BackupController> _logger = logger;
+    private readonly IRabbitMqManager _rabbitMqManager = rabbitMqManager;
 
     [HttpPost]
     public async Task<IActionResult> CreateBackupSchedule([FromBody] BackupScheduleRequest? request)
@@ -56,10 +61,7 @@ public class BackupController(IScheduleDao scheduleDao, ILogger<BackupController
             DestPath = request.DestPath,
             CronExpression = request.CronExpression
         };
-
-        Console.WriteLine($"schedule: will create the schedule");
         var id = await _scheduleDao.Create(newSchedule);
-        Console.WriteLine($"schedule: created the schedule with id: {id}");
         if (id <= 0)
         {
             return Ok(new ApiResult<object, string>("Internal server error"));
