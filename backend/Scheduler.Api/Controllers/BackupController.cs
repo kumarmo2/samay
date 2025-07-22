@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Kumarmo2.Rabbitmq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -134,6 +135,12 @@ public class BackupController(IScheduleDao scheduleDao,
             ExitCode = null,
         };
         // TODO: send message to rabbitmq
+
+        var backupRunEvent = new AdhocBackupRunEvent { RunId = backupRunId };
+        using var memJson = new MemoryStream();
+        await JsonSerializer.SerializeAsync(memJson, backupRunEvent);
+        byte[] bytes = memJson.ToArray();
+        await _rabbitMqManager.PushToQueueAsync(Constants.AdhocBackupQueueName, bytes);
 
         return Ok(new ApiResult<ScheduleDashoardItem, string>(dashboardItem));
     }

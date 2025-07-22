@@ -226,7 +226,7 @@ const SchedulesTable = ({ handleRunNowClick, isLoading, handleToggleEnabled, sch
                             return (
                                 <TableRow key={schedule.id}>
                                     <TableCell><Button variant="secondary"
-                                        disabled={!schedule.lastCompletedAt} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
+                                        disabled={!schedule.lastCompletedAt && !!schedule.lastStartTime} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
                                     </TableCell>
                                     <TableCell>{schedule.srcPath}</TableCell>
                                     <TableCell>{schedule.destPath}</TableCell>

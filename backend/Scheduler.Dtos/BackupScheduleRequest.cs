@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Scheduler.Models;
 namespace Scheduler.Dtos;
 
@@ -20,6 +21,12 @@ public class ScheduleDashoardItem : Schedule
     public DateTime? LastCompletedAt { get; set; }
     public DateTime? LastStartTime { get; set; }
     public int? ExitCode { get; set; }
+}
+
+public class AdhocBackupRunEvent
+{
+    [JsonPropertyName("runId")]
+    public int RunId { get; set; }
 }
 
 
