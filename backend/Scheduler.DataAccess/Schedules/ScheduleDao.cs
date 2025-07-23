@@ -49,10 +49,12 @@ public class SchedulerDao(IDatabaseConnectionFactory dbConnectionFactory) : ISch
     {
         var query = @"
             with cte as (
-                    select scheduleid, completedat, starttime, exitcode, rank() over (partition by scheduleid order by starttime desc) as rank
+                    select id, scheduleid, completedat, starttime, exitcode, rank() over (partition by scheduleid order by starttime desc) as rank
                     from scheduler.backupruns
             )
-            select s.*, c.completedat as lastcompletedat, c.starttime as laststarttime, c.exitcode as exitcode
+            select s.*, c.completedat as lastcompletedat,
+            c.starttime as laststarttime, c.exitcode as exitcode,
+            c.id as latestrunid
             from scheduler.schedules s left join cte c on s.id = c.scheduleid and c.rank = 1
             order by id";
         using var conn = await _dbConnectionFactory.GetConnectionAsync();

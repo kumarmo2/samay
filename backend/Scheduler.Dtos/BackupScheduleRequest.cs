@@ -21,6 +21,7 @@ public class ScheduleDashoardItem : Schedule
     public DateTime? LastCompletedAt { get; set; }
     public DateTime? LastStartTime { get; set; }
     public int? ExitCode { get; set; }
+    public int? LatestRunId { get; set; }
 }
 
 public class AdhocBackupRunEvent

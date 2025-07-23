@@ -34,6 +34,7 @@ export type ScheduleDashoardItem = {
     lastCompletedAt?: string;
     lastStartTime?: string;
     exitCode?: number;
+    latestRunId?: number;
 }
 
 function HomeComponent() {
@@ -226,7 +227,7 @@ const SchedulesTable = ({ handleRunNowClick, isLoading, handleToggleEnabled, sch
                             return (
                                 <TableRow key={schedule.id}>
                                     <TableCell><Button variant="secondary"
-                                        disabled={!schedule.lastCompletedAt && !!schedule.lastStartTime} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
+                                        disabled={!schedule.latestRunId || !schedule.lastCompletedAt} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
                                     </TableCell>
                                     <TableCell>{schedule.srcPath}</TableCell>
                                     <TableCell>{schedule.destPath}</TableCell>
