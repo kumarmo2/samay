@@ -139,82 +139,82 @@ func doAdhocBackupWork(backupWork *BackupWork) {
 
 	db := backupWork.db
 
-	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		false,  // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
-	)
-	notifyChan := make(chan *amqp.Error)
-	notifyChan = ch.NotifyClose(notifyChan)
+	for {
+		msgs, err := ch.Consume(
+			q.Name, // queue
+			"",     // consumer
+			false,  // auto-ack
+			false,  // exclusive
+			false,  // no-local
+			false,  // no-wait
+			nil,    // args
+		)
+		notifyChan := make(chan *amqp.Error)
+		notifyChan = ch.NotifyClose(notifyChan)
 
-	go func() {
-		err, ok := <-notifyChan
-		if !ok {
-			log.Println("channel closed")
-			return
-		}
+		go func() {
+			err, ok := <-notifyChan
+			if !ok {
+				log.Println("channel closed")
+				return
+			}
+			if err != nil {
+				log.Println("channel closed, err; ", err)
+				return
+
+			}
+		}()
+
 		if err != nil {
-			log.Println("channel closed, err; ", err)
-			return
-
+			log.Fatal(err)
 		}
-	}()
 
-	if err != nil {
-		log.Fatal(err)
+		for msg := range msgs {
+			// log.Println("failing on purpose")
+			// continue
+			log.Printf("Received a message: %s", msg.Body)
+			var event dtos.BackupRunEvent
+			json.Unmarshal(msg.Body, &event)
+			log.Printf("event: %+v\n", event)
+			query := "select * from scheduler.backupruns where id = $1"
+			var backupRun models.BackupRun
+			err = db.Get(&backupRun, query, event.RunId)
+
+			if err != nil {
+				log.Println("error while getting backuprun: ", err)
+				msg.Ack(false)
+				continue
+			}
+			log.Printf("backupRun: %+v\n", backupRun)
+			var schedule models.Schedule
+			query = "select * from scheduler.schedules where id = $1"
+			err = db.Get(&schedule, query, backupRun.ScheduleId)
+			if err != nil {
+				log.Println("error while getting schedule: ", err)
+				continue
+			}
+			log.Printf("schedule: %+v\n", schedule)
+			const submittedBackupRunStatus = 3
+			query = "update scheduler.backupruns set status = $1 where id = $2"
+			_, err = db.Exec(query, 3, event.RunId)
+			if err != nil {
+				log.Println("error while updating backuprun: ", err)
+				continue
+			}
+			log.Println("updated the status")
+			err, exitCode := backupWork.doAdhocBackupWork(event.RunId, &schedule)
+			if err != nil {
+				log.Println("error while doing adhoc backup work: ", err)
+				continue
+			}
+			log.Println("exitCode: ", exitCode)
+			if exitCode == 0 {
+				msg.Ack(false)
+			} else {
+				msg.Nack(false, false)
+			}
+		}
 	}
-
-	for msg := range msgs {
-
-		log.Printf("Received a message: %s", msg.Body)
-		var event dtos.BackupRunEvent
-		json.Unmarshal(msg.Body, &event)
-		log.Printf("event: %+v\n", event)
-		query := "select * from scheduler.backupruns where id = $1"
-		var backupRun models.BackupRun
-		err = db.Get(&backupRun, query, event.RunId)
-
-		if err != nil {
-			log.Println("error while getting backuprun: ", err)
-			continue
-		}
-		log.Printf("backupRun: %+v\n", backupRun)
-		var schedule models.Schedule
-		query = "select * from scheduler.schedules where id = $1"
-		err = db.Get(&schedule, query, backupRun.ScheduleId)
-		if err != nil {
-			log.Println("error while getting schedule: ", err)
-			continue
-		}
-		log.Printf("schedule: %+v\n", schedule)
-		const submittedBackupRunStatus = 3
-		query = "update scheduler.backupruns set status = $1 where id = $2"
-		_, err = db.Exec(query, 3, event.RunId)
-		if err != nil {
-			log.Println("error while updating backuprun: ", err)
-			continue
-		}
-		log.Println("updated the status")
-		err, exitCode := backupWork.doAdhocBackupWork(event.RunId, &schedule)
-		if err != nil {
-			log.Println("error while doing adhoc backup work: ", err)
-			continue
-		}
-		log.Println("exitCode: ", exitCode)
-		if exitCode == 0 {
-			msg.Ack(false)
-		} else {
-			msg.Nack(false, false)
-		}
-
-		// 1. do the backup work
-		// 2. if exitCode == 0, then send `ack` otherwise `nack`
-	}
-	log.Println("this is unreachable. adhoc backup worker exited")
 }
 
 func (bw *BackupWork) doAdhocBackupWork(runId int, schedule *models.Schedule) (error, int) {

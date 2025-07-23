@@ -224,10 +224,13 @@ const SchedulesTable = ({ handleRunNowClick, isLoading, handleToggleEnabled, sch
                 <TableBody>
                     {
                         schedules.map(schedule => {
+                            const { latestRunId, lastCompletedAt } = schedule;
+                            const shouldEnableRunNowButton = (latestRunId && lastCompletedAt) || (!latestRunId);
+
                             return (
                                 <TableRow key={schedule.id}>
                                     <TableCell><Button variant="secondary"
-                                        disabled={!schedule.latestRunId || !schedule.lastCompletedAt} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
+                                        disabled={!shouldEnableRunNowButton} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
                                     </TableCell>
                                     <TableCell>{schedule.srcPath}</TableCell>
                                     <TableCell>{schedule.destPath}</TableCell>

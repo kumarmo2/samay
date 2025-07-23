@@ -131,6 +131,7 @@ public class BackupController(IScheduleDao scheduleDao,
             Name = scheduleTask.Result.Name,
             SrcPath = scheduleTask.Result.SrcPath,
             LastStartTime = run.StartTime,
+            LatestRunId = backupRunId,
             LastCompletedAt = null,
             ExitCode = null,
         };
