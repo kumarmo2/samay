@@ -9,6 +9,7 @@ import React from "react";
 import FullPageLoader from "@/components/custom/full-page-loader";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { CheckedState } from "@radix-ui/react-checkbox";
+import { Loader } from "lucide-react";
 
 
 type BackupScheduleRequest = {
@@ -31,7 +32,9 @@ export type ScheduleDashoardItem = {
     cronExpression: string;
     enabled: boolean;
     lastCompletedAt?: string;
+    lastStartTime?: string;
     exitCode?: number;
+    latestRunId?: number;
 }
 
 function HomeComponent() {
@@ -39,10 +42,13 @@ function HomeComponent() {
     const [showModal, setShowModal] = useState(false);
     const deleteRef = React.useRef<number>(null);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [isFetching, setIsFetching] = React.useState(false);
 
 
     const fetchSchedules = async () => {
+        setIsFetching(true);
         const res = await get<ScheduleDashoardItem[], string>("/api/backup/schedules");
+        setIsFetching(false);
         if (!res.ok) {
             return;
         }
@@ -117,7 +123,36 @@ function HomeComponent() {
             console.log("error: ", e);
             setIsLoading(false);
         }
-    }, [schedules])
+    }, [schedules, setSchedules])
+
+    const handleRunNowClick = useCallback(async (schedule: ScheduleDashoardItem) => {
+        try {
+            setIsFetching(true)
+            const res = await post<ScheduleDashoardItem, string>(`/api/backup/schedules/${schedule.id}/run`)
+            setIsFetching(false)
+            if (!res.ok) {
+                alert(res.err || "Internal server error");
+                return;
+            }
+            const newSchedules = schedules.map(s => {
+                if (s.id !== schedule.id) {
+                    return s;
+                }
+                const newSchedule = {
+                    ...s,
+                    ...res.ok,
+                };
+                return newSchedule;
+            });
+
+            setSchedules(newSchedules);
+        } catch (e) {
+            console.log("error: ", e);
+            setIsFetching(false);
+        }
+
+    }, [isFetching, setIsFetching]);
+
 
 
     return (
@@ -137,7 +172,11 @@ function HomeComponent() {
                 </DialogContent>
             </Dialog>
             <Scheduler initSrcPath={defaultSrcPath} initDestPath={defaultDestPath} initCronExpression="0 0 * * *" onSubmitClick={handleSubmitClick} />
-            <SchedulesTable handleToggleEnabled={handleEnableCheck} schedules={schedules} onDeleteClick={handleDeleteClick} />
+            <SchedulesTable isLoading={isFetching}
+                handleToggleEnabled={handleEnableCheck}
+                schedules={schedules}
+                onDeleteClick={handleDeleteClick}
+                handleRunNowClick={handleRunNowClick} />
         </div >
     )
 }
@@ -146,24 +185,31 @@ type SchedulesTableProps = {
     handleToggleEnabled: (id: number, checked: boolean) => void;
     schedules: ScheduleDashoardItem[];
     onDeleteClick: (id: number) => void;
+    isLoading?: boolean;
+    handleRunNowClick: (schedule: ScheduleDashoardItem) => void;
 }
 
-const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: SchedulesTableProps) => {
+const SchedulesTable = ({ handleRunNowClick, isLoading, handleToggleEnabled, schedules, onDeleteClick }: SchedulesTableProps) => {
     const handleCheckClick = (id: number, checked: CheckedState) => {
         if (checked === "indeterminate") {
             return;
         }
         if (checked == true) {
         }
-        console.log("checked: ", checked);
         handleToggleEnabled(id, checked);
     }
 
     return (
-        <div className="flex flex-col">
+        <div className="flex flex-col relative">
+            {isLoading &&
+                <div className="bg-transparent z-10 backdrop-blur-xs absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
+                    <Loader className="animate-spin" />
+                </div>
+            }
             <Table>
                 <TableHeader>
                     <TableRow>
+                        <TableHead>Run Now</TableHead>
                         <TableHead>Source Path</TableHead>
                         <TableHead>Destination Path</TableHead>
                         <TableHead>Cron Expression</TableHead>
@@ -171,14 +217,21 @@ const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: Sched
                         <TableHead>Delete</TableHead>
                         <TableHead>Enabled</TableHead>
                         <TableHead>Last Completed At</TableHead>
+                        <TableHead>Last Start Time</TableHead>
                         <TableHead>Exit Code</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
                         schedules.map(schedule => {
+                            const { latestRunId, lastCompletedAt } = schedule;
+                            const shouldEnableRunNowButton = (latestRunId && lastCompletedAt) || (!latestRunId);
+
                             return (
                                 <TableRow key={schedule.id}>
+                                    <TableCell><Button variant="secondary"
+                                        disabled={!shouldEnableRunNowButton} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
+                                    </TableCell>
                                     <TableCell>{schedule.srcPath}</TableCell>
                                     <TableCell>{schedule.destPath}</TableCell>
                                     <TableCell>{schedule.cronExpression}</TableCell>
@@ -186,6 +239,7 @@ const SchedulesTable = ({ handleToggleEnabled, schedules, onDeleteClick }: Sched
                                     <TableCell><Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button></TableCell>
                                     <TableCell><Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} /></TableCell>
                                     <TableCell>{schedule.lastCompletedAt}</TableCell>
+                                    <TableCell>{schedule.lastStartTime}</TableCell>
                                     <TableCell>{schedule.exitCode}</TableCell>
                                 </TableRow>
                             )

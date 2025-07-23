@@ -16,7 +16,7 @@ type BackupRun struct {
 	ScheduleId    *int       `db:"scheduleid" json:"scheduleId"`
 	BackupRunType int        `db:"backupruntype" json:"backupRunType"`
 	Status        int        `db:"status" json:"status"`
-	StartTime     time.Time  `db:"starttime" json:"startTime"`
+	StartTime     *time.Time `db:"starttime" json:"startTime"`
 	CompletedAt   *time.Time `db:"completedat" json:"completedAt"`
 	ExitCode      *int       `db:"exitcode" json:"exitCode"`
 	Logs          *string    `db:"logs" json:"logs"`

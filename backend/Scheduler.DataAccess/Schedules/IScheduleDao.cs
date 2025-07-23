@@ -13,4 +13,5 @@ public interface IScheduleDao
     Task<int> Create(Schedule schedule);
     Task<List<ScheduleDashoardItem>> GetDashboardList();
     Task PartialUpdate(int id, BackupSchedulePartialUpdateRequest request);
+    Task<BackupRun?> GetAnyNotCompletedRun(int scheduleId);
 }
