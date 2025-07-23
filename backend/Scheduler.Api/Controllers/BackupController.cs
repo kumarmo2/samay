@@ -135,7 +135,6 @@ public class BackupController(IScheduleDao scheduleDao,
             LastCompletedAt = null,
             ExitCode = null,
         };
-        // TODO: send message to rabbitmq
 
         var backupRunEvent = new AdhocBackupRunEvent { RunId = backupRunId };
         using var memJson = new MemoryStream();
