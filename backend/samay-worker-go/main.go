@@ -91,7 +91,7 @@ func doCronWork(backupWork *BackupWork) {
 }
 
 func main() {
-	db, err := sqlx.Connect("postgres", "host=192.168.29.206 user=postgres password=admin dbname=homelab sslmode=disable")
+	db, err := sqlx.Connect("postgres", "host=192.168.1.3 user=postgres password=admin dbname=homelab sslmode=disable")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -109,8 +109,8 @@ func main() {
 func doAdhocBackupWork(backupWork *BackupWork) {
 	rabbit_conn_str := os.Getenv("RABBITMQ_CONN_STR")
 	if rabbit_conn_str == "" {
-		log.Println("RABBITMQ_CONN_STR is not set, using default amqp://user:password@192.168.29.81:5672")
-		rabbit_conn_str = "amqp://user:password@192.168.29.81:5672"
+		log.Println("RABBITMQ_CONN_STR is not set, using default amqp://user:password@192.168.1.8:5672")
+		rabbit_conn_str = "amqp://user:password@192.168.1.8:5672"
 	}
 	amqpConn, err := amqp.Dial(rabbit_conn_str)
 	if err != nil {
@@ -245,6 +245,8 @@ func (bw *BackupWork) backupWork(schedule models.Schedule, runId int, resultChan
 			log.Println("error: ", err)
 		}
 	}()
+	
+	log.Println(">>> running the rsync command now");
 	cmd := exec.Command("rsync", "-rPavh", schedule.SrcPath, schedule.DestPath)
 
 	stdoutBuf := bytes.NewBuffer(make([]byte, 0))
