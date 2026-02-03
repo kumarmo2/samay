@@ -141,19 +141,19 @@ export const Scheduler = ({
 
     return (
 
-        <div className="flex flex-col gap-4">
-            <div className="flex gap-4">
+        <div className="flex w-full flex-col gap-4">
+            <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <Path currPath={srcPath} onPathChange={handleSrcPathChange}
                     childPathOptions={srcChildPathOptions} isFetching={isFetching} />
                 <Path currPath={destPath}
                     onPathChange={handleDestPathChange}
                     childPathOptions={destChildPathOptions}
                     isFetching={isFetching} />
-                <Button className="mx-6 cursor-pointer" type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
+                <Button className="w-full cursor-pointer lg:w-auto lg:self-start" type="submit" onClick={handleSubmitClick} disabled={isSubmitDisabled()} >
                     Submit
                 </Button>
             </div>
-            <div className="mt-4">
+            <div className="mt-2">
                 <CronExpression initCronExpression={initCronExpression} ref={cronRef} onValueChange={onCronValueChange} />
             </div>
         </div>
@@ -182,9 +182,9 @@ const Path = ({ childPathOptions, currPath, onPathChange, isFetching }: {
         <Select open={open} value={currPath} onOpenChange={handleOpen} >
             <Tooltip>
                 <TooltipTrigger asChild>
-                    <SelectTrigger className="w-[380px]">
+                    <SelectTrigger className="w-full min-w-0">
                         <SelectValue placeholder="Theme" >
-                            {currPath}
+                            <span className="block truncate">{currPath}</span>
                         </SelectValue>
                     </SelectTrigger>
                 </TooltipTrigger>

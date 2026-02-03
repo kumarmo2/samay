@@ -10,11 +10,13 @@ export type CronType = "oneshot" | "daily" | "hourly"
 
 function App() {
     return (
-        <div className="flex flex-col items-center h-screen py-10 mx-10 border-x">
-            <Routes>
-                <Route path="/" element={<HomeComponent />} />
-                <Route path="/edit/:id" element={<Edit />} />
-            </Routes>
+        <div className="min-h-screen w-full bg-background">
+            <div className="mx-auto flex min-h-screen w-full flex-col px-4 py-6 sm:px-6 sm:py-10 lg:px-10 lg:border-x border-border">
+                <Routes>
+                    <Route path="/" element={<HomeComponent />} />
+                    <Route path="/edit/:id" element={<Edit />} />
+                </Routes>
+            </div>
         </div>
     )
 }

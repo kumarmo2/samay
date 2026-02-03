@@ -10,6 +10,7 @@ import FullPageLoader from "@/components/custom/full-page-loader";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { CheckedState } from "@radix-ui/react-checkbox";
 import { Loader } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 
 type BackupScheduleRequest = {
@@ -24,6 +25,33 @@ type BackupSchedulePartialUpdateRequest = {
 
 const defaultSrcPath = import.meta.env.VITE_DEFAULT_SRC_PATH || "/home/kumarmo2/dev";
 const defaultDestPath = import.meta.env.VITE_DEFAULT_DEST_PATH || "/media/kumarmo2/kumarmo2-hdd-1/backups";
+
+const OverflowText = ({ value, className }: { value?: string | number | null, className?: string }) => {
+    // const text = value === null || value === undefined || value === "" ? "-" : String(value);
+    const text = !value ? "-" : String(value);
+    const textRef = React.useRef<HTMLSpanElement>(null);
+    const [title, setTitle] = useState("");
+
+    const handleMouseEnter = useCallback(() => {
+        const el = textRef.current;
+        if (!el) {
+            return;
+        }
+        const isOverflowing = el.scrollWidth > el.clientWidth;
+        setTitle(isOverflowing ? text : "");
+    }, [text]);
+
+    return (
+        <span
+            ref={textRef}
+            title={title}
+            onMouseEnter={handleMouseEnter}
+            className={cn("block min-w-0 truncate", className)}
+        >
+            {text}
+        </span>
+    );
+};
 
 export type ScheduleDashoardItem = {
     id: number;
@@ -156,7 +184,7 @@ function HomeComponent() {
 
 
     return (
-        <div className="flex flex-col">
+        <div className="flex w-full flex-col gap-8">
             {
                 isLoading && <FullPageLoader />
             }
@@ -164,9 +192,9 @@ function HomeComponent() {
                 <DialogContent>
                     <div className="px-1 text-center flex flex-col gap-2">
                         <DialogTitle className="text-xl font-bold">Are you sure you want to delete this schedule?</DialogTitle>
-                        <div className="flex justify-around">
-                            <Button onClick={handleDeleteConfirm} variant="destructive">Delete</Button>
-                            <Button>Cancel</Button>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:justify-around">
+                            <Button onClick={handleDeleteConfirm} variant="destructive" className="w-full sm:w-auto">Delete</Button>
+                            <Button className="w-full sm:w-auto">Cancel</Button>
                         </div>
                     </div>
                 </DialogContent>
@@ -200,53 +228,121 @@ const SchedulesTable = ({ handleRunNowClick, isLoading, handleToggleEnabled, sch
     }
 
     return (
-        <div className="flex flex-col relative">
+        <div className="flex w-full flex-col gap-4 relative">
             {isLoading &&
                 <div className="bg-transparent z-10 backdrop-blur-xs absolute top-0 bottom-0 left-0 right-0 flex justify-center items-center">
                     <Loader className="animate-spin" />
                 </div>
             }
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Run Now</TableHead>
-                        <TableHead>Source Path</TableHead>
-                        <TableHead>Destination Path</TableHead>
-                        <TableHead>Cron Expression</TableHead>
-                        <TableHead>Edit</TableHead>
-                        <TableHead>Delete</TableHead>
-                        <TableHead>Enabled</TableHead>
-                        <TableHead>Last Completed At</TableHead>
-                        <TableHead>Last Start Time</TableHead>
-                        <TableHead>Exit Code</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {
-                        schedules.map(schedule => {
-                            const { latestRunId, lastCompletedAt } = schedule;
-                            const shouldEnableRunNowButton = (latestRunId && lastCompletedAt) || (!latestRunId);
+            <div className="w-full overflow-x-auto rounded-lg border border-border">
+                <Table className="w-full">
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="whitespace-nowrap">Run Now</TableHead>
+                            <TableHead className="sm:hidden">Schedule</TableHead>
+                            <TableHead className="hidden sm:table-cell">Source Path</TableHead>
+                            <TableHead className="hidden sm:table-cell">Destination Path</TableHead>
+                            <TableHead className="hidden md:table-cell whitespace-nowrap">Cron Expression</TableHead>
+                            <TableHead className="hidden lg:table-cell whitespace-nowrap">Last Completed At</TableHead>
+                            <TableHead className="hidden lg:table-cell whitespace-nowrap">Last Start Time</TableHead>
+                            <TableHead className="hidden lg:table-cell">Exit Code</TableHead>
+                            <TableHead className="hidden sm:table-cell">Edit</TableHead>
+                            <TableHead className="hidden sm:table-cell">Delete</TableHead>
+                            <TableHead className="hidden sm:table-cell">Enabled</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {
+                            schedules.map(schedule => {
+                                const { latestRunId, lastCompletedAt } = schedule;
+                                const shouldEnableRunNowButton = (latestRunId && lastCompletedAt) || (!latestRunId);
 
-                            return (
-                                <TableRow key={schedule.id}>
-                                    <TableCell><Button variant="secondary"
-                                        disabled={!shouldEnableRunNowButton} className="hover:cursor-pointer" onClick={() => handleRunNowClick(schedule)}>Run Now</Button>
-                                    </TableCell>
-                                    <TableCell>{schedule.srcPath}</TableCell>
-                                    <TableCell>{schedule.destPath}</TableCell>
-                                    <TableCell>{schedule.cronExpression}</TableCell>
-                                    <TableCell><Link to={`/edit/${schedule.id}`}>Edit</Link></TableCell>
-                                    <TableCell><Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button></TableCell>
-                                    <TableCell><Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} /></TableCell>
-                                    <TableCell>{schedule.lastCompletedAt}</TableCell>
-                                    <TableCell>{schedule.lastStartTime}</TableCell>
-                                    <TableCell>{schedule.exitCode}</TableCell>
-                                </TableRow>
-                            )
-                        })
-                    }
-                </TableBody>
-            </Table>
+                                return (
+                                    <TableRow key={schedule.id}>
+                                        <TableCell className="whitespace-nowrap">
+                                            <Button
+                                                variant="secondary"
+                                                disabled={!shouldEnableRunNowButton}
+                                                className="hover:cursor-pointer"
+                                                onClick={() => handleRunNowClick(schedule)}
+                                            >
+                                                Run Now
+                                            </Button>
+                                        </TableCell>
+                                        <TableCell className="sm:hidden">
+                                            <div className="flex flex-col gap-2 text-sm">
+                                                <div className="min-w-0">
+                                                    <p className="text-xs uppercase text-muted-foreground">Source</p>
+                                                    <OverflowText value={schedule.srcPath} className="font-medium" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-xs uppercase text-muted-foreground">Destination</p>
+                                                    <OverflowText value={schedule.destPath} />
+                                                </div>
+                                                <div className="flex flex-wrap gap-4">
+                                                    <div>
+                                                        <p className="text-xs uppercase text-muted-foreground">Cron</p>
+                                                        <OverflowText value={schedule.cronExpression} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs uppercase text-muted-foreground">Exit</p>
+                                                        <OverflowText value={schedule.exitCode} />
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap gap-4">
+                                                    <div>
+                                                        <p className="text-xs uppercase text-muted-foreground">Last completed</p>
+                                                        <OverflowText value={schedule.lastCompletedAt} />
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-xs uppercase text-muted-foreground">Last start</p>
+                                                        <OverflowText value={schedule.lastStartTime} />
+                                                    </div>
+                                                </div>
+                                                <div className="flex flex-wrap items-center gap-3">
+                                                    <Link className="text-sm font-medium underline" to={`/edit/${schedule.id}`}>Edit</Link>
+                                                    <Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs uppercase text-muted-foreground">Enabled</span>
+                                                        <Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell max-w-[220px]">
+                                            <OverflowText value={schedule.srcPath} className="max-w-[220px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell max-w-[220px]">
+                                            <OverflowText value={schedule.destPath} className="max-w-[220px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell max-w-[180px]">
+                                            <OverflowText value={schedule.cronExpression} className="max-w-[180px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell max-w-[180px]">
+                                            <OverflowText value={schedule.lastCompletedAt} className="max-w-[180px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell max-w-[180px]">
+                                            <OverflowText value={schedule.lastStartTime} className="max-w-[180px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden lg:table-cell max-w-[100px]">
+                                            <OverflowText value={schedule.exitCode} className="max-w-[100px]" />
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            <Link className="text-sm underline" to={`/edit/${schedule.id}`}>Edit</Link>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            <Button variant="destructive" onClick={() => onDeleteClick(schedule.id)}>Delete</Button>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            <Checkbox onCheckedChange={(checked) => handleCheckClick(schedule.id, checked)} checked={schedule.enabled} />
+                                        </TableCell>
+                                    </TableRow>
+                                )
+                            })
+                        }
+                    </TableBody>
+                </Table>
+            </div>
         </div>
     )
 }

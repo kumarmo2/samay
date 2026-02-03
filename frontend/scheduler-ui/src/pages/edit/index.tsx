@@ -45,9 +45,8 @@ const Edit = () => {
         alert("Successfully updated the schedule.");
     }
 
-    return <div className="flex flex-col">
+    return <div className="flex w-full flex-col gap-6">
         {
-
             schedule && <Scheduler initSrcPath={schedule.srcPath} initDestPath={schedule.destPath}
                 initCronExpression={schedule.cronExpression} onSubmitClick={handleSubmitClick} />
         }

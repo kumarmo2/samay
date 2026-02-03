@@ -36,15 +36,15 @@ export const CronExpression = React.forwardRef(({ onValueChange, initCronExpress
         onValueChange && onValueChange(parseResult)
     }
 
-    return <div>Cron expression
-        <div ref={ref} className={cn("flex gap-2", hasError && " [&>*]:border-red-900")}>
-            <Input defaultValue={minute} ref={minuteRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-12" />
-            <Input defaultValue={hour} ref={hourRef} placeholder="0" onBlur={handleOnBlur} className="border-emerald-300 w-12" />
-            <Input type="text" defaultValue={day} placeholder={day} disabled className="border-emerald-300 w-12" />
-            <Input type="text" defaultValue={month} placeholder={month} disabled className="border-emerald-300 w-12" />
-            <Input defaultValue={dayOfWeek} placeholder={dayOfWeek} disabled className="border-emerald-300 w-12" />
+    return <div className="flex flex-col gap-2">
+        <span className="text-sm font-medium">Cron expression</span>
+        <div ref={ref} className={cn("grid grid-cols-2 gap-2 sm:grid-cols-5", hasError && " [&>*]:border-red-900")}>
+            <Input defaultValue={minute} ref={minuteRef} placeholder="0" onBlur={handleOnBlur} className="w-full border-emerald-300" />
+            <Input defaultValue={hour} ref={hourRef} placeholder="0" onBlur={handleOnBlur} className="w-full border-emerald-300" />
+            <Input type="text" defaultValue={day} placeholder={day} disabled className="w-full border-emerald-300" />
+            <Input type="text" defaultValue={month} placeholder={month} disabled className="w-full border-emerald-300" />
+            <Input defaultValue={dayOfWeek} placeholder={dayOfWeek} disabled className="w-full border-emerald-300" />
         </div>
     </div>
 })
-
 
