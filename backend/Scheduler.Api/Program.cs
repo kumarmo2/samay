@@ -14,6 +14,7 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
         var services = builder.Services;
         services.AddControllers();
+        services.AddHealthChecks();
         services.AddLogging();
         services.AddDatabaseConnection(builder.Configuration);
         services.AddRabbitMq(builder.Configuration);
@@ -34,6 +35,7 @@ public class Program
 
 
         var app = builder.Build();
+        app.UseHealthChecks("/api/health");
 
         if (app.Environment.IsDevelopment())
         {
