@@ -1,6 +1,7 @@
 [Unit]
 Description=Samay worker
-After=network.target
+Wants=network-online.target
+After=network-online.target
 
 [Service]
 Type=simple
@@ -8,6 +9,7 @@ WorkingDirectory=/home/kumarmo2/dev/kumarmo2/samay/backend/samay-worker-go
 ExecStartPre=/usr/local/go/bin/go build -buildvcs=false -o samay-worker .
 ExecStart=/home/kumarmo2/dev/kumarmo2/samay/backend/samay-worker-go/samay-worker
 Restart=always
+RestartSec=5
 User=root
 Group=root
 

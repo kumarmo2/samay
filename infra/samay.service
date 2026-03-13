@@ -1,6 +1,8 @@
 [Unit]
 Description=Samay Docker compose
-After=docker.service
+Requires=docker.service
+Wants=network-online.target
+After=docker.service network-online.target
 
 [Service]
 WorkingDirectory=/home/kumarmo2/dev/kumarmo2/samay
@@ -9,6 +11,7 @@ ExecStart=docker compose up
 ExecStop=docker compose down
 TimeoutStartSec=0
 Restart=always
+RestartSec=5
 # User=root
 
 [Install]
