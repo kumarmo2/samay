@@ -109,8 +109,8 @@ func main() {
 func doAdhocBackupWork(backupWork *BackupWork) {
 	rabbit_conn_str := os.Getenv("RABBITMQ_CONN_STR")
 	if rabbit_conn_str == "" {
-		log.Println("RABBITMQ_CONN_STR is not set, using default amqp://user:password@192.168.1.8:5672")
-		rabbit_conn_str = "amqp://user:password@192.168.1.8:5672"
+		log.Println("RABBITMQ_CONN_STR is not set, using default amqp://user:password@192.168.1.3:5672")
+		rabbit_conn_str = "amqp://user:password@192.168.1.3:5672"
 	}
 	amqpConn, err := amqp.Dial(rabbit_conn_str)
 	if err != nil {
